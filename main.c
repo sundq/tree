@@ -15,32 +15,27 @@
  */
 
 
-static int xrandom()
-{
-	time_t t;
-	srand((unsigned) time(&t));
-	return rand();
-}
-
 static int compare(void *a, void *b)
 {
 	int a1 = *(int *)a;
 	int b1 = *(int *)b;
-	return a - b;
+	printf("src=%d  dst=%d\n", a1, b1);
+	return a1 - b1;
 }
 
 int main(int argc, char** argv)
 {
+	srand((unsigned) time(NULL));
 	binary_tree_t *t = binary_tree_init(compare);
 	
-	for (int i=0; i < 10000; i++)
+	for (int i=0; i < 1000; i++)
 	{
-		printf("xxL:%d", i);
 		int *tmp = malloc(sizeof(int));
-		*tmp = xrandom();
+		*tmp = rand() % 1000;
+		printf("xxL:%d\n", *tmp);
 	    binary_tree_add(t, tmp);		
 	}
-    printf("xxxxxxxxxxtree size:%d", t->size);
+    printf("xxxxxxxxxxtree size:%lu", t->size);
 	return (EXIT_SUCCESS);
 }
 
