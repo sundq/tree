@@ -19,8 +19,13 @@ static int compare(void *a, void *b)
 {
 	int a1 = *(int *)a;
 	int b1 = *(int *)b;
-	printf("src=%d  dst=%d\n", a1, b1);
 	return a1 - b1;
+}
+
+static int traverse(void *a)
+{
+	printf("%d ", *(int *)a);
+	return 0;
 }
 
 int main(int argc, char** argv)
@@ -28,7 +33,7 @@ int main(int argc, char** argv)
 	srand((unsigned) time(NULL));
 	binary_tree_t *t = binary_tree_init(compare);
 	
-	for (int i=0; i < 1000; i++)
+	for (int i=0; i < 10; i++)
 	{
 		int *tmp = malloc(sizeof(int));
 		*tmp = rand() % 1000;
@@ -36,6 +41,8 @@ int main(int argc, char** argv)
 	    binary_tree_add(t, tmp);		
 	}
     printf("xxxxxxxxxxtree size:%lu", t->size);
+	binary_inorder_traversal(t, traverse);
+	printf("\n");
 	return (EXIT_SUCCESS);
 }
 
