@@ -44,7 +44,7 @@ struct binary_tree
 
 binary_tree_t *binary_tree_init(compare_func_t func);
 int binary_tree_add(binary_tree_t *t, void *data);
-int binary_tree_get(binary_tree_t *t, void *data);
+binary_tree_node_t *binary_tree_get(binary_tree_t *t, void *data);
 int binary_tree_range(binary_tree_t *t, void *max_data, void *min_data);
 int binary_tree_del(binary_tree_t *t, void *data);
 int binary_inorder_traversal(binary_tree_t *t, traversal_callback cb);

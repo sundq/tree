@@ -15,8 +15,10 @@ int binary_tree_add(binary_tree_t *btree, void *data)
 {
 	int ret = 0;
 	binary_tree_node_t **current_node = &btree->root;
+	binary_tree_node_t *parent_node = btree->root;
 	while (*current_node != NULL)
 	{
+		parent_node = *current_node;
 		if (btree->compare_func(data, (*current_node)->data) > 0) //right child
 		{
 			current_node = &(*current_node)->rchild;
@@ -37,13 +39,13 @@ int binary_tree_add(binary_tree_t *btree, void *data)
 		*current_node = (binary_tree_node_t *) (allocate_memory(sizeof (binary_tree_node_t)));
 		(*current_node)->data = data;
 		(*current_node)->count++;
+		(*current_node)->parent = parent_node;
 	}
 	return ret;
 }
 
-int binary_tree_get(binary_tree_t *btree, void *data)
+binary_tree_node_t *binary_tree_get(binary_tree_t *btree, void *data)
 {
-	int ret = 0;
 	binary_tree_node_t *current_node = btree->root;
 	while (current_node != NULL)
 	{
@@ -51,18 +53,17 @@ int binary_tree_get(binary_tree_t *btree, void *data)
 		{
 			current_node = current_node->rchild;
 		}
-		else if (btree->compare_func(data, current_node->lchild) < 0) //left child
+		else if (btree->compare_func(data, current_node->data) < 0) //left child
 		{
 			current_node = current_node->lchild;
 		}
 		else
 		{
-			return ret;
+			return current_node;
 		}
 
 	}
-	ret = -1;
-	return ret;
+	return NULL;
 }
 
 int binary_inorder_traversal(binary_tree_t *btree, traversal_callback cb)
@@ -71,7 +72,7 @@ int binary_inorder_traversal(binary_tree_t *btree, traversal_callback cb)
 	binary_tree_node_t *prev_node = NULL;
 	while (current_node != NULL)
 	{
-		if (current_node->lchild == NULL)
+		if (current_node->lchild == NULL) //the left child is NULL, process current node and set current_node to right child
 		{
 			cb(current_node->data);
 			current_node = current_node->rchild;
@@ -83,7 +84,7 @@ int binary_inorder_traversal(binary_tree_t *btree, traversal_callback cb)
 			{
 				prev_node = prev_node->rchild;
 			}
-			
+
 			if (prev_node->rchild == NULL)
 			{
 				prev_node->rchild = current_node;
@@ -97,38 +98,54 @@ int binary_inorder_traversal(binary_tree_t *btree, traversal_callback cb)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
-//int binary_tree_del(binary_tree_t *btree, void *data)
-//{
-//	int ret = 0;
-//	int index = binary_tree_get(btree, data);
-//	if (index >= 0)
-//	{
-//		if (btree->buff[index].count > 1)
-//		{
-//			btree->buff[index].count--;
-//			return ret;
-//		}
-//
-//		int right_child_index = index << 1 + 2;
-//		int left_child_index = index << 1 + 1;
-//
-//		if (right_child_index)
-//		{
-//
-//		}
-//
-//
-//
-//
-//	}
-//	else
-//	{
-//		return -1;
-//	}
-//
-//}
+int binary_tree_del(binary_tree_t *btree, void *data)
+{
+	binary_tree_node_t *node = binary_tree_get(btree, data);
+	binary_tree_node_t *parent_node = NULL;
+	binary_tree_node_t *back_node = NULL;
+	if (node != NULL)
+	{
+		parent_node = node->parent;
+		node->count--;
+		if (node->count == 0)
+		{
+			if (node->lchild != NULL && node->rchild != NULL)
+			{
+				back_node = node->rchild;
+				while (back_node->lchild != NULL)
+				{
+					back_node = back_node->lchild;
+				}
+			}
+			else
+			{
+				back_node = node->lchild != NULL ? node->lchild : node->rchild;
+			}
+
+			if (parent_node != NULL && parent_node->lchild == node)
+			{
+				parent_node->lchild = back_node;
+			}
+			else if (parent_node != NULL && parent_node->rchild == node)
+			{
+				parent_node->rchild = back_node;
+			}
+
+
+			if (back_node != NULL)
+			{
+				back_node->parent = parent_node;
+				back_node->lchild = node->lchild;
+				back_node->rchild = node->rchild;
+			}
+			release_memory(node);
+		}
+	}
+
+	return 0;
+}
 
