@@ -28,6 +28,13 @@ static int traverse(void *a)
 	return 0;
 }
 
+static int traverse_bfs(void *a)
+{
+//	static binary_tree_node_t *p_node = 
+	printf("%d||", *(int *) a);
+	return 0;
+}
+
 int main(int argc, char** argv)
 {
 	srand((unsigned) time(NULL));
@@ -43,10 +50,12 @@ int main(int argc, char** argv)
 	int *tmp = malloc(sizeof (int));
 	*tmp = 532;
 	binary_tree_add(t, tmp);
-	binary_inorder_traversal(t, traverse);
+	binary_tree_inorder_traversal(t, traverse);
+	printf("\n");
+	binary_tree_bfs_traversal(t, traverse_bfs);
 	printf("\n");
 	binary_tree_del(t, tmp);
-	binary_inorder_traversal(t, traverse);
+	binary_tree_inorder_traversal(t, traverse);
     
 	printf("\n");
 	return (EXIT_SUCCESS);

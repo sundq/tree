@@ -16,10 +16,11 @@ extern "C"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <memory.h>    
- 
+#include <memory.h> 
+#include "./util/memory_pool.h"
+
 #define DEFAULT_BUFF_SIZE 1024    
-    
+
 typedef struct binary_tree_node binary_tree_node_t;
 typedef struct binary_tree binary_tree_t;
 typedef int (* compare_func_t)(void *src, void *dst);
@@ -48,7 +49,7 @@ binary_tree_node_t *binary_tree_get(binary_tree_t *t, void *data);
 int binary_tree_range(binary_tree_t *t, void *max_data, void *min_data);
 int binary_tree_del(binary_tree_t *t, void *data);
 int binary_inorder_traversal(binary_tree_t *t, traversal_callback cb);
-
+int binary_tree_bfs_traversal(binary_tree_t *t, traversal_callback cb);
 #ifdef	__cplusplus
 }
 #endif
