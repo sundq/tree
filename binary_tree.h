@@ -19,7 +19,9 @@ extern "C"
 #include <memory.h> 
 #include "./util/memory_pool.h"
 
-#define DEFAULT_BUFF_SIZE 1024    
+#define DEFAULT_BUFF_SIZE 1024 
+#define MAX_HEIGHT 1000
+#define INFINITY (1<<20)
 
 typedef struct binary_tree_node binary_tree_node_t;
 typedef struct binary_tree binary_tree_t;
@@ -45,11 +47,15 @@ struct binary_tree
 
 binary_tree_t *binary_tree_init(compare_func_t func);
 int binary_tree_add(binary_tree_t *t, void *data);
+int binary_tree_avl_add(binary_tree_t *t, void *data);
 binary_tree_node_t *binary_tree_get(binary_tree_t *t, void *data);
 int binary_tree_range(binary_tree_t *t, void *max_data, void *min_data);
 int binary_tree_del(binary_tree_t *t, void *data);
-int binary_inorder_traversal(binary_tree_t *t, traversal_callback cb);
+int binary_tree_inorder_traversal(binary_tree_t *t, traversal_callback cb);
 int binary_tree_bfs_traversal(binary_tree_t *t, traversal_callback cb);
+int binary_tree_bfs_traversal_subtree(binary_tree_node_t *t, traversal_callback cb);
+int binary_tree_deepth_sub_tree(binary_tree_node_t *t);
+void print_ascii_tree(binary_tree_node_t * t);
 #ifdef	__cplusplus
 }
 #endif

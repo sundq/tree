@@ -44,7 +44,7 @@ void *queue_pop(queue_t *q)
 	return ret;
 }
 
-int queue_destory(queue_t *q)
+int queue_destroy(queue_t *q)
 {
 	release_memory(q->buf);
 	release_memory(q);

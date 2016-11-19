@@ -33,7 +33,7 @@ struct queue
 queue_t *queue_init(int size);
 int queue_push(queue_t *q, void *data);
 void *queue_pop(queue_t *q);
-int queue_destory(queue_t *q);
+int queue_destroy(queue_t *q);
 int queue_is_empty(queue_t *q);
 
 
