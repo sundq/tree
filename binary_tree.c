@@ -11,9 +11,8 @@ binary_tree_t *binary_tree_init(compare_func_t func)
 	return btree;
 }
 
-int binary_tree_add(binary_tree_t *btree, void *data)
+binary_tree_node_t *binary_tree_add(binary_tree_t *btree, void *data)
 {
-	int ret = 0;
 	binary_tree_node_t **current_node = &btree->root;
 	binary_tree_node_t *parent_node = btree->root;
 	while (*current_node != NULL)
@@ -41,7 +40,7 @@ int binary_tree_add(binary_tree_t *btree, void *data)
 		(*current_node)->count++;
 		(*current_node)->parent = parent_node;
 	}
-	return ret;
+	return *current_node;
 }
 
 binary_tree_node_t *binary_tree_get(binary_tree_t *btree, void *data)
@@ -190,8 +189,6 @@ int binary_tree_del(binary_tree_t *btree, void *data)
 			if (back_node != NULL) //back_node is NULL when node is leaf node
 			{
 				back_node->parent = parent_node;
-//				back_node->lchild = node->lchild;
-//				back_node->rchild = node->rchild;
 			}
 
 			if (parent_node != NULL)
@@ -211,39 +208,8 @@ int binary_tree_del(binary_tree_t *btree, void *data)
 				btree->root = back_node;
 			}
 			release_memory(node);
-
 		}
 	}
 
 	return 0;
 }
-
-//add a node for AVL tree
-
-int binary_tree_avl_add(binary_tree_t *btree, void *data)
-{
-	binary_tree_add(btree, data);
-	int ldeepth = binary_tree_deepth_sub_tree(btree->root->lchild);
-	int rdeepth = binary_tree_deepth_sub_tree(btree->root->rchild);
-	if (btree->compare_func(data, btree->root->data) > 0) // rchild child
-	{
-		if (rdeepth - ldeepth == 2)
-		{
-			//
-		}
-	}
-	else if (btree->compare_func(data, btree->root->data) < 0) // lchild child
-	{
-		if (ldeepth - rdeepth == 2)
-		{
-			//
-		}
-	}
-	else
-	{
-		btree->root->count++;
-	}
-	return 0;
-}
-
-

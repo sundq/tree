@@ -40,16 +40,16 @@ int main(int argc, char** argv)
 	int *del_tmp = malloc(sizeof (int));
 	srand((unsigned) time(NULL));
 	binary_tree_t *t = binary_tree_init(compare);
-
+    int test[10] = {36, 37, 38};
 	for (int i = 0; i < 10; i++)
 	{
 		int *tmp = malloc(sizeof (int));
-		*tmp = rand() % 1000;
+		*tmp = test[i];//rand() % 1000;
 		if (i == 5)
 		{
 			*del_tmp = *tmp;
 		}
-		binary_tree_add(t, tmp);
+		binary_tree_avl_add(t, tmp);
 	}
 //	printf("xxxxxxxxxxtree size:%lu\n", t->size);
 	print_ascii_tree(t->root);
