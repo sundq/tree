@@ -5,16 +5,30 @@
 static binary_tree_node_t *ll_rotate(binary_tree_node_t *node)
 {
 	binary_tree_node_t *top = node->lchild;
+
 	node->lchild = top->rchild;
+	if (top->rchild != NULL)
+	{
+		top->rchild->parent = node;
+	}
+	
 	top->rchild = node;
+	node->parent = top;
 	return top;
 }
 
 static binary_tree_node_t *rr_rotate(binary_tree_node_t *node)
 {
 	binary_tree_node_t *top = node->rchild;
+
 	node->rchild = top->lchild;
+	if (top->lchild != NULL)
+	{
+		top->lchild->parent = node;
+	}
+
 	top->lchild = node;
+ 	node->parent = top;
 	return top;
 }
 
@@ -26,7 +40,7 @@ static binary_tree_node_t *lr_rotate(binary_tree_node_t *node)
 
 static binary_tree_node_t *rl_rotate(binary_tree_node_t *node)
 {
-	node->rchild = ll_rotate(node->lchild);
+	node->rchild = ll_rotate(node->rchild);
 	return rr_rotate(node);
 }
 
@@ -58,19 +72,17 @@ binary_tree_node_t *binary_tree_avl_add(binary_tree_t *btree, void *data)
 #endif				
 				if (btree->compare_func(data, unbalance_node->rchild->data) > 0)
 				{
+#if TREE_DEBUG
+					printf("need RR rotate");
+#endif					
 					rotate_sub_tree = rr_rotate(unbalance_node);
 				}
 				else
 				{
+#if TREE_DEBUG
+					printf("need RL rotate");
+#endif
 					rotate_sub_tree = rl_rotate(unbalance_node);
-				}
-				if (parent_node != NULL)
-				{
-					parent_node->rchild = rotate_sub_tree;
-				}
-				else
-				{
-					btree->root = rotate_sub_tree;
 				}
 				break;
 			}
@@ -82,31 +94,52 @@ binary_tree_node_t *binary_tree_avl_add(binary_tree_t *btree, void *data)
 #if TREE_DEBUG
 				printf("unbalance_node is: %d\n", *((int *) unbalance_node->data));
 #endif				
-				
+
 				if (btree->compare_func(data, unbalance_node->lchild->data) > 0)
 				{
+#if TREE_DEBUG
+					printf("need LR rotate");
+#endif					
 					rotate_sub_tree = lr_rotate(unbalance_node);
 				}
 				else
 				{
+#if TREE_DEBUG
+					printf("need LL rotate");
+#endif					
 					rotate_sub_tree = ll_rotate(unbalance_node);
 				}
-				if (parent_node != NULL)
-				{
-					parent_node->lchild = rotate_sub_tree;
-				}
-				else
-				{
-					btree->root = rotate_sub_tree;
-				}				
-				
 				break;
 			}
 		}
 		unbalance_node = unbalance_node->parent;
 	}
 
+	if (parent_node != NULL)
+	{
+		if (btree->compare_func(rotate_sub_tree->data, parent_node->data) > 0)
+		{
+			parent_node->rchild = rotate_sub_tree;
+		}
+		else
+		{
+			parent_node->lchild = rotate_sub_tree;
+		}
+
+	}
+	else
+	{
+		btree->root = rotate_sub_tree;
+	}
+	rotate_sub_tree->parent = parent_node;
+
 #if TREE_DEBUG
+	printf("\nROTATE TREE IS:------------------\n");
+	if (rotate_sub_tree != NULL)
+	{
+		print_ascii_tree(rotate_sub_tree);
+	}
+
 	printf("\nAFTER ROTATE THE TREE IS:------------------\n");
 	print_ascii_tree(btree->root);
 #endif
