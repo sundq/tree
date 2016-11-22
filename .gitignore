@@ -1,5 +1,6 @@
 nbproject/*
 dist/Debug
 build/Debug
+build/Release
 .dep.inc
 Makefile
