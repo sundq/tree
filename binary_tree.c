@@ -162,7 +162,7 @@ int binary_tree_deepth_sub_tree(binary_tree_node_t *subtree)
 	return binary_tree_bfs_traversal_subtree(subtree, NULL);
 }
 
-int binary_tree_del(binary_tree_t *btree, void *data)
+binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 {
 	binary_tree_node_t *node = binary_tree_get(btree, data);
 	binary_tree_node_t *parent_node = NULL;
@@ -173,7 +173,7 @@ int binary_tree_del(binary_tree_t *btree, void *data)
 		if (node->count == 0)
 		{
 			parent_node = node->parent;
-			if (node->lchild != NULL && node->rchild != NULL)
+			if (node->lchild != NULL && node->rchild != NULL) //如果左右子树都不为空，右子树的最左叶子节点为后继节点
 			{
 				back_node = node->rchild;
 				while (back_node->lchild != NULL)
@@ -189,6 +189,8 @@ int binary_tree_del(binary_tree_t *btree, void *data)
 			if (back_node != NULL) //back_node is NULL when node is leaf node
 			{
 				back_node->parent = parent_node;
+				back_node->lchild = node->lchild;
+				back_node->rchild = node->rchild == back_node ? NULL : node->rchild;
 			}
 
 			if (parent_node != NULL)
@@ -210,6 +212,5 @@ int binary_tree_del(binary_tree_t *btree, void *data)
 			release_memory(node);
 		}
 	}
-
-	return 0;
+	return back_node != NULL ? back_node : parent_node;
 }
