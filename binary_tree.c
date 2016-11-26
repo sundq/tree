@@ -165,52 +165,67 @@ int binary_tree_deepth_sub_tree(binary_tree_node_t *subtree)
 binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 {
 	binary_tree_node_t *node = binary_tree_get(btree, data);
-	binary_tree_node_t *parent_node = NULL;
-	binary_tree_node_t *back_node = NULL;
+	binary_tree_node_t *parent_successor_node = NULL;
+	binary_tree_node_t *successor_node = node;
+	binary_tree_node_t *successor_child_node = NULL;
 	if (node != NULL)
 	{
 		node->count--;
 		if (node->count == 0)
 		{
-			parent_node = node->parent;
-			if (node->lchild != NULL && node->rchild != NULL) //如果左右子树都不为空，右子树的最左叶子节点为后继节点
+			if (node->rchild != NULL)
 			{
-				back_node = node->rchild;
-				while (back_node->lchild != NULL)
+				parent_successor_node = node;
+				successor_node = node->rchild;
+				while (successor_node->lchild != NULL)
 				{
-					back_node = back_node->lchild;
+					parent_successor_node = successor_node;
+					successor_node = successor_node->lchild;
+				}
+			}
+			else if (node->lchild != NULL)
+			{
+				parent_successor_node = node;
+				successor_node = node->lchild;
+				while (successor_node->rchild != NULL)
+				{
+					parent_successor_node = successor_node;
+					successor_node = successor_node->rchild;
 				}
 			}
 			else
 			{
-				back_node = node->lchild != NULL ? node->lchild : node->rchild;
+				parent_successor_node = node->parent;
+				successor_node = node;
 			}
 
-			if (back_node != NULL) //back_node is NULL when node is leaf node
+			successor_child_node = successor_node->lchild != NULL ? successor_node->lchild : successor_node->rchild;
+			if (parent_successor_node == NULL)
 			{
-				back_node->parent = parent_node;
-				back_node->lchild = node->lchild;
-				back_node->rchild = node->rchild == back_node ? NULL : node->rchild;
+				btree->root = NULL;
 			}
-
-			if (parent_node != NULL)
+			else if (parent_successor_node->lchild == successor_node)
 			{
-				if (parent_node->lchild == node) //del lchild child
-				{
-					parent_node->lchild = back_node;
-				}
-				else //del rchild child
-				{
-					parent_node->rchild = back_node;
-				}
-
+				parent_successor_node->lchild = successor_child_node;
 			}
 			else
 			{
-				btree->root = back_node;
+				parent_successor_node->rchild = successor_child_node;
 			}
-			release_memory(node);
+			if (successor_child_node != NULL)
+			{
+				successor_child_node->parent = parent_successor_node;
+			}
+
+
+			node->data - successor_node->data;
+			release_memory(successor_node);
 		}
 	}
-	return back_node != NULL ? back_node : parent_node;
+	return parent_successor_node;
+}
+
+binary_tree_node_t *binary_tree_destory(binary_tree_t *btree)
+{
+	
 }
