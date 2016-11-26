@@ -1,6 +1,13 @@
 #include "binary_tree.h"
 #include "./util/queue.h"
 
+static int release_node(void *a)
+{
+	release_memory(a);
+	return 0;
+}
+
+
 binary_tree_t *binary_tree_init(compare_func_t func)
 {
 	binary_tree_t *btree = (binary_tree_t *) (allocate_memory(sizeof (binary_tree_t)));
@@ -222,11 +229,11 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 			release_memory(successor_node);
 		}
 	}
-	return parent_successor_node;
+	return successor_child_node != NULL ? successor_child_node : node;
 }
 
 int binary_tree_destory(binary_tree_t *btree)
 {
-
+	binary_tree_bfs_traversal_subtree(btree->root, release_node);
 	return 0;
 }
