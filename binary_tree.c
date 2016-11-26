@@ -218,14 +218,15 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 			}
 
 
-			node->data - successor_node->data;
+			node->data = successor_node->data;
 			release_memory(successor_node);
 		}
 	}
 	return parent_successor_node;
 }
 
-binary_tree_node_t *binary_tree_destory(binary_tree_t *btree)
+int binary_tree_destory(binary_tree_t *btree)
 {
-	
+
+	return 0;
 }

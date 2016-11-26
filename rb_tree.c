@@ -89,7 +89,7 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 		}
 		else //叔叔是黑色
 		{
-			if (current_node = p_node->rchild)
+			if (current_node == p_node->rchild)
 			{
 				current_node = p_node;
 				if (p_p_node->lchild == p_node)

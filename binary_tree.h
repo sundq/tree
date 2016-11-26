@@ -25,7 +25,7 @@ extern "C"
 
 typedef struct binary_tree_node binary_tree_node_t;
 typedef struct binary_tree binary_tree_t;
-typedef enum rb_color rb_color_t;
+typedef enum rb_color { RED = 1, BLACK} rb_color_t;
 typedef int (* compare_func_t)(void *src, void *dst);
 typedef int (* traversal_callback)(void *data);
 
@@ -45,12 +45,6 @@ struct binary_tree
     size_t size;
     size_t deep;
     compare_func_t compare_func; //compare function 
-};
-
-enum rb_color
-{
-    RED = 1,
-    BLACK,
 };
 
 
