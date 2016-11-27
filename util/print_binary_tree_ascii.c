@@ -98,10 +98,18 @@ asciinode * build_ascii_tree_recursive(binary_tree_node_t * t)
 	{
 		node->rchild->parent_dir = 1;
 	}
-
-	sprintf(node->label, "%d", *((int *)(t->data)));
-	node->lablen = strlen(node->label);
-
+	if (t->color == RED)
+	{
+		sprintf(node->label, "\033[31m%d\033[0m", *((int *)(t->data)));
+	    node->lablen = strlen(node->label) - 9 ;
+	}
+	else
+	{
+		sprintf(node->label, "%d", *((int *)(t->data)));
+	    node->lablen = strlen(node->label) ;
+		
+	}
+		
 	return node;
 }
 

@@ -2,9 +2,10 @@
 
 //add a node for AVL tree
 
-static inline binary_tree_node_t *ll_rotate(binary_tree_node_t *node, binary_tree_node_t *p_node)
+static inline binary_tree_node_t *rr_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
 	binary_tree_node_t *top = node->lchild;
+	binary_tree_node_t *p_node = node->parent;
 
 	node->lchild = top->rchild;
 	if (top->rchild != NULL)
@@ -28,13 +29,18 @@ static inline binary_tree_node_t *ll_rotate(binary_tree_node_t *node, binary_tre
 			p_node->rchild = top;
 		}
 	}
+	else
+	{
+		btree->root = top;
+	}
 
 	return top;
 }
 
-static inline binary_tree_node_t *rr_rotate(binary_tree_node_t *node, binary_tree_node_t *p_node)
+static inline binary_tree_node_t *ll_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
 	binary_tree_node_t *top = node->rchild;
+	binary_tree_node_t *p_node = node->parent;
 
 	node->rchild = top->lchild;
 	if (top->lchild != NULL)
@@ -55,12 +61,14 @@ static inline binary_tree_node_t *rr_rotate(binary_tree_node_t *node, binary_tre
 		{
 			p_node->rchild = top;
 		}
-
+	}
+	else
+	{
+		btree->root = top;
 	}
 
 	return top;
 }
-
 
 /*
  Case 1	当前节点的父节点是红色，且当前节点的祖父节点的另一个子节点（叔叔节点）也是红色。	
@@ -81,41 +89,71 @@ Case 3	当前节点的父节点是红色，叔叔节点是黑色，且当前节�
 static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_node_t *node)
 {
 	binary_tree_node_t *current_node = node;
-	binary_tree_node_t *p_node = NULL;
-	binary_tree_node_t *p_p_node = NULL;
 	binary_tree_node_t *uncle_node = NULL;
-	while (current_node->parent->color == RED)
+	while (current_node->parent && current_node->parent->color == RED)
 	{
-		p_node = current_node->parent;
-		p_p_node = p_node->parent; //祖先结点肯定存在，不用判断NULL情况
-		if (p_node == p_p_node->lchild) //父节点是祖父结点的左孩子
+		if (current_node->parent->parent == NULL)
 		{
-			uncle_node = p_p_node->rchild; //祖父结点的右孩子-叔叔结点
+			break;
+		}
+
+		if (current_node->parent == current_node->parent->parent->lchild) //父节点是祖父结点的左孩子
+		{
+			uncle_node = current_node->parent->parent->rchild; //祖父结点的右孩子-叔叔结点
+			if (uncle_node == NULL || uncle_node->color == RED) //1 .叔叔是红色
+			{
+				current_node->parent->color = BLACK; //将“父节点”设为黑色。
+				if (uncle_node != NULL)
+				{
+					uncle_node->color = BLACK; //将“叔叔节点”设为黑色。	
+				}
+				current_node->parent->parent->color = RED; //将“祖父节点”设为“红色”。
+				current_node = current_node->parent->parent;
+			}
+			else //叔叔是黑色
+			{
+				if (current_node == current_node->parent->rchild)
+				{
+					current_node = current_node->parent;
+					ll_rotate(btree, current_node);
+				}
+				else
+				{
+					current_node->parent->color = BLACK;
+					current_node->parent->parent->color = RED;
+					rr_rotate(btree, current_node->parent->parent);
+				}
+			}
+
 		}
 		else
 		{
-			uncle_node = p_p_node->lchild; //祖父结点的右孩子-叔叔结点			
-		}
+			uncle_node = current_node->parent->parent->lchild; //祖父结点的右孩子-叔叔结点
 
-		if (uncle_node->color == RED) //1 .叔叔是红色
-		{
-			p_node->color = BLACK; //将“父节点”设为黑色。
-			uncle_node->color = BLACK; //将“叔叔节点”设为黑色。
-			p_p_node->color = RED; //将“祖父节点”设为“红色”。
-			current_node = p_p_node;
-		}
-		else //叔叔是黑色
-		{
-			if (current_node == p_node->rchild)
+			//叔叔结点可能不存在， 此时可以假设叔叔结点为红色
+			if (uncle_node == NULL || uncle_node->color == RED) //1 .叔叔是红色
 			{
-				current_node = p_node;
-				ll_rotate(current_node, p_p_node);
+				current_node->parent->color = BLACK; //将“父节点”设为黑色。
+				if (uncle_node != NULL)
+				{
+					uncle_node->color = BLACK; //将“叔叔节点”设为黑色。	
+				}
+				current_node->parent->parent->color = RED; //将“祖父节点”设为“红色”。
+				current_node = current_node->parent->parent;
 			}
-			else
+			else //叔叔是黑色
 			{
-				p_node->color = BLACK;
-				p_p_node->color = RED;
-				rr_rotate(current_node, p_p_node);
+				if (current_node == current_node->parent->lchild)
+				{
+					current_node = current_node->parent;
+					ll_rotate(btree, current_node);
+				}
+				else
+				{
+					current_node->parent->color = BLACK;
+					current_node->parent->parent->color = RED;
+					rr_rotate(btree, current_node->parent->parent);
+				}
 			}
 		}
 	}
@@ -165,10 +203,10 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->color = BLACK;
 				current_node->parent->color = RED;
-				ll_rotate(current_node->parent, current_node->parent->parent);
+				ll_rotate(btree, current_node->parent->parent);
 				sibling_node = current_node->parent->rchild;
 			}
-			
+
 			if (sibling_node->lchild->color == BLACK && sibling_node->rchild->color == BLACK)
 			{
 				sibling_node->color = RED;
@@ -178,12 +216,12 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->lchild->color = BLACK;
 				sibling_node->color = RED;
-				rr_rotate(sibling_node, sibling_node->parent);
+				rr_rotate(btree, sibling_node);
 				sibling_node = current_node->parent->rchild;
-				
+
 				sibling_node->color = current_node->parent->color;
 				current_node->parent->color = BLACK;
-				ll_rotate(current_node->parent, current_node->parent->parent);
+				ll_rotate(btree, current_node->parent);
 				current_node = btree->root;
 			}
 		}
@@ -194,10 +232,10 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->color = BLACK;
 				current_node->parent->color = RED;
-				ll_rotate(current_node->parent, current_node->parent->parent);
+				ll_rotate(btree, current_node->parent);
 				sibling_node = current_node->parent->lchild;
 			}
-			
+
 			if (sibling_node->lchild->color == BLACK && sibling_node->rchild->color == BLACK)
 			{
 				sibling_node->color = RED;
@@ -207,12 +245,12 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->rchild->color = BLACK;
 				sibling_node->color = RED;
-				rr_rotate(sibling_node, sibling_node->parent);
+				rr_rotate(btree, sibling_node);
 				sibling_node = current_node->parent->lchild;
-				
+
 				sibling_node->color = current_node->parent->color;
 				current_node->parent->color = BLACK;
-				ll_rotate(current_node->parent, current_node->parent->parent);
+				ll_rotate(btree, current_node->parent);
 				current_node = btree->root;
 			}
 
