@@ -35,10 +35,7 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 			if (uncle_node != NULL && color(uncle_node) == RED) //1 .叔叔是红色
 			{
 				color(p(cur_node)) = BLACK; //将“父节点”设为黑色。
-				if (uncle_node != NULL)
-				{
-					color(uncle_node) = BLACK; //将“叔叔节点”设为黑色。	
-				}
+				color(uncle_node) = BLACK; //将“叔叔节点”设为黑色。	
 				color(p(p(cur_node))) = RED; //将“祖父节点”设为“红色”。
 				cur_node = p(p(cur_node));
 			}
@@ -118,72 +115,85 @@ color[x] ← BLACK
 static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tree_node_t *node)
 {
 	binary_tree_node_t *sibling_node = NULL;
-	binary_tree_node_t *current_node = node;
+	binary_tree_node_t *cur_node = node;
+	
+#if TREE_DEBUG
+		printf("cur node is...%d\n", *(int *) (node->data));
+#endif	
 
-	while (current_node != btree->root && current_node->color == BLACK)
+	while (cur_node != btree->root && color(cur_node) == BLACK)
 	{
-		if (current_node == current_node->parent->lchild)
+		if (cur_node == left(p(cur_node)))
 		{
-			sibling_node = current_node->parent->rchild;
-			if (sibling_node->color == RED)
+			sibling_node = right(p(cur_node));
+			if (sibling_node == NULL);
 			{
-				sibling_node->color = BLACK;
-				current_node->parent->color = RED;
-				binary_tree_left_rotate(btree, current_node->parent->parent);
-				sibling_node = current_node->parent->rchild;
+				break;
+			}
+			if (color(sibling_node) == RED)
+			{
+				color(sibling_node) = BLACK;
+				color(p(cur_node)) = RED;
+				binary_tree_left_rotate(btree, p(cur_node));
+				sibling_node = right(p(cur_node));
 			}
 
-			if (sibling_node->lchild->color == BLACK && sibling_node->rchild->color == BLACK)
+			if (color(left(sibling_node)) == BLACK && color(right(sibling_node)) == BLACK)
 			{
-				sibling_node->color = RED;
-				current_node = current_node->parent;
+				color(sibling_node) = RED;
+				cur_node = p(cur_node);
 			}
-			else if (sibling_node->rchild->color == BLACK)
+			else if (color(right(sibling_node)) == BLACK)
 			{
-				sibling_node->lchild->color = BLACK;
-				sibling_node->color = RED;
+				color(left(sibling_node)) = BLACK;
+				color(sibling_node) = RED;
 				binary_tree_right_rotate(btree, sibling_node);
-				sibling_node = current_node->parent->rchild;
-
-				sibling_node->color = current_node->parent->color;
-				current_node->parent->color = BLACK;
-				binary_tree_left_rotate(btree, current_node->parent);
-				current_node = btree->root;
+				sibling_node = right(p(cur_node));
+			}
+			else
+			{
+				color(sibling_node) = color(p(cur_node));
+				color(p(cur_node)) = BLACK;
+				color(right(sibling_node)) = BLACK;
+				binary_tree_left_rotate(btree, p(cur_node));
+				cur_node = btree->root;
 			}
 		}
 		else
 		{
-			sibling_node = current_node->parent->lchild;
-			if (sibling_node->color == RED)
+			sibling_node = left(p(cur_node));
+			if (color(sibling_node) == RED)
 			{
-				sibling_node->color = BLACK;
-				current_node->parent->color = RED;
-				binary_tree_left_rotate(btree, current_node->parent);
-				sibling_node = current_node->parent->lchild;
+				color(sibling_node) = BLACK;
+				color(p(cur_node)) = RED;
+				binary_tree_right_rotate(btree, p(cur_node));
+				sibling_node = left(p(cur_node));
 			}
 
-			if (sibling_node->lchild->color == BLACK && sibling_node->rchild->color == BLACK)
+			if (color(right(sibling_node)) == BLACK && color(left(sibling_node)) == BLACK)
 			{
-				sibling_node->color = RED;
-				current_node = current_node->parent;
+				color(sibling_node) = RED;
+				cur_node = p(cur_node);
 			}
-			else if (sibling_node->lchild->color == BLACK)
+			else if (color(left(sibling_node)) == BLACK)
 			{
-				sibling_node->rchild->color = BLACK;
-				sibling_node->color = RED;
-				binary_tree_right_rotate(btree, sibling_node);
-				sibling_node = current_node->parent->lchild;
-
-				sibling_node->color = current_node->parent->color;
-				current_node->parent->color = BLACK;
-				binary_tree_left_rotate(btree, current_node->parent);
-				current_node = btree->root;
+				color(right(sibling_node)) = BLACK;
+				color(sibling_node) = RED;
+				binary_tree_left_rotate(btree, sibling_node);
+				sibling_node = left(p(cur_node));
 			}
-
+			else
+			{
+				color(sibling_node) = color(p(cur_node));
+				color(p(cur_node)) = BLACK;
+				color(left(sibling_node)) = BLACK;
+				binary_tree_right_rotate(btree, p(cur_node));
+				cur_node = btree->root;
+			}
 		}
 	}
-	current_node->color = BLACK;
-	return current_node;
+	color(cur_node) = BLACK;
+	return cur_node;
 }
 
 binary_tree_node_t *binary_tree_rb_add(binary_tree_t *btree, void *data)
@@ -200,6 +210,14 @@ binary_tree_node_t *binary_tree_rb_add(binary_tree_t *btree, void *data)
 
 binary_tree_node_t *binary_tree_rb_del(binary_tree_t *btree, void *data)
 {
-	binary_tree_node_t *sub_tree = binary_tree_del(btree, data);
-	return make_del_tree_balance(btree, sub_tree);
+	binary_tree_node_t *node = binary_tree_del(btree, data);
+	if (node != NULL)
+	{
+	    return make_del_tree_balance(btree, node);		
+	}
+	else
+	{
+		return node;
+	}
+
 }

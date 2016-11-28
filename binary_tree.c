@@ -9,69 +9,68 @@ static int release_node(void *a)
 
 binary_tree_node_t *binary_tree_right_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
-    binary_tree_node_t *top = left(node);
-    binary_tree_node_t *p_node = p(node);
+	binary_tree_node_t *top = left(node);
+	binary_tree_node_t *p_node = p(node);
 
-    left(node) = right(top);
-    if (right(top) != NULL)
-    {
-        p(right(top)) = node;
-    }
+	left(node) = right(top);
+	if (right(top) != NULL)
+	{
+		p(right(top)) = node;
+	}
 
-    right(top) = node;
-    p(node) = top;
-    if (p_node != NULL)
-    {
-        if (left(p_node) == node)
-        {
-            left(p_node) = top;
-        }
-        else
-        {
-            right(p_node) = top;
-        }
-    }
-    else
-    {
-        btree->root = top;
-    }
-    p(top) = p_node;
-    return top;
+	right(top) = node;
+	p(node) = top;
+	if (p_node != NULL)
+	{
+		if (left(p_node) == node)
+		{
+			left(p_node) = top;
+		}
+		else
+		{
+			right(p_node) = top;
+		}
+	}
+	else
+	{
+		btree->root = top;
+	}
+	p(top) = p_node;
+	return top;
 }
 
 binary_tree_node_t *binary_tree_left_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
-    binary_tree_node_t *top = node->rchild;
-    binary_tree_node_t *p_node = node->parent;
+	binary_tree_node_t *top = node->rchild;
+	binary_tree_node_t *p_node = node->parent;
 
-    right(node) = left(top);
-    if (left(top) != NULL)
-    {
-        p(left(top)) = node;
-    }
+	right(node) = left(top);
+	if (left(top) != NULL)
+	{
+		p(left(top)) = node;
+	}
 
-    left(top) = node;
-    p(node) = top;
+	left(top) = node;
+	p(node) = top;
 
-    if (p_node != NULL)
-    {
-        if (left(p_node) == node)
-        {
-            left(p_node) = top;
-        }
-        else
-        {
-            right(p_node) = top;
-        }
-    }
-    else
-    {
-        btree->root = top;
-    }
-    p(top) = p_node;
-    return top;
+	if (p_node != NULL)
+	{
+		if (left(p_node) == node)
+		{
+			left(p_node) = top;
+		}
+		else
+		{
+			right(p_node) = top;
+		}
+	}
+	else
+	{
+		btree->root = top;
+	}
+	p(top) = p_node;
+	return top;
 }
-
 
 binary_tree_t *binary_tree_init(compare_func_t func)
 {
@@ -100,7 +99,7 @@ binary_tree_node_t *binary_tree_add(binary_tree_t *btree, void *data)
 		}
 		else
 		{
-			(*current_node)->count++;
+			//the key have existed
 			break;
 		}
 	}
@@ -109,7 +108,6 @@ binary_tree_node_t *binary_tree_add(binary_tree_t *btree, void *data)
 	{
 		*current_node = (binary_tree_node_t *) (allocate_memory(sizeof (binary_tree_node_t)));
 		(*current_node)->data = data;
-		(*current_node)->count++;
 		(*current_node)->parent = parent_node;
 	}
 	return *current_node;
@@ -242,59 +240,56 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 	binary_tree_node_t *successor_child_node = NULL;
 	if (node != NULL)
 	{
-		node->count--;
-		if (node->count == 0)
+		if (node->rchild != NULL)
 		{
-			if (node->rchild != NULL)
+			parent_successor_node = node;
+			successor_node = node->rchild;
+			while (successor_node->lchild != NULL)
 			{
-				parent_successor_node = node;
-				successor_node = node->rchild;
-				while (successor_node->lchild != NULL)
-				{
-					parent_successor_node = successor_node;
-					successor_node = successor_node->lchild;
-				}
+				parent_successor_node = successor_node;
+				successor_node = successor_node->lchild;
 			}
-			else if (node->lchild != NULL)
-			{
-				parent_successor_node = node;
-				successor_node = node->lchild;
-				while (successor_node->rchild != NULL)
-				{
-					parent_successor_node = successor_node;
-					successor_node = successor_node->rchild;
-				}
-			}
-			else
-			{
-				parent_successor_node = node->parent;
-				successor_node = node;
-			}
-
-			successor_child_node = successor_node->lchild != NULL ? successor_node->lchild : successor_node->rchild;
-			if (parent_successor_node == NULL)
-			{
-				btree->root = NULL;
-			}
-			else if (parent_successor_node->lchild == successor_node)
-			{
-				parent_successor_node->lchild = successor_child_node;
-			}
-			else
-			{
-				parent_successor_node->rchild = successor_child_node;
-			}
-			if (successor_child_node != NULL)
-			{
-				successor_child_node->parent = parent_successor_node;
-			}
-
-
-			node->data = successor_node->data;
-			release_memory(successor_node);
 		}
+		else if (node->lchild != NULL)
+		{
+			parent_successor_node = node;
+			successor_node = node->lchild;
+			while (successor_node->rchild != NULL)
+			{
+				parent_successor_node = successor_node;
+				successor_node = successor_node->rchild;
+			}
+		}
+		else
+		{
+			parent_successor_node = node->parent;
+			successor_node = node;
+		}
+
+		successor_child_node = successor_node->lchild != NULL ? successor_node->lchild : successor_node->rchild;
+		if (parent_successor_node == NULL)
+		{
+			btree->root = NULL;
+		}
+		else if (parent_successor_node->lchild == successor_node)
+		{
+			parent_successor_node->lchild = successor_child_node;
+		}
+		else
+		{
+			parent_successor_node->rchild = successor_child_node;
+		}
+		if (successor_child_node != NULL)
+		{
+			successor_child_node->parent = parent_successor_node;
+		}
+
+
+		node->data = successor_node->data;
+		release_memory(successor_node);
 	}
-	return successor_child_node != NULL ? successor_child_node : node;
+
+	return successor_child_node;
 }
 
 int binary_tree_destory(binary_tree_t *btree)
