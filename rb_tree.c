@@ -33,6 +33,12 @@ static inline binary_tree_node_t *rr_rotate(binary_tree_t *btree, binary_tree_no
 	{
 		btree->root = top;
 	}
+	top->parent = p_node;
+	printf("----------rr_rotate s-----------------------\n");
+
+	print_ascii_tree(btree->root);
+
+	printf("--------------rr_rotate e-----------------\n");
 
 	return top;
 }
@@ -66,7 +72,13 @@ static inline binary_tree_node_t *ll_rotate(binary_tree_t *btree, binary_tree_no
 	{
 		btree->root = top;
 	}
+	top->parent = p_node;
 
+	printf("----------ll_rotate s-----------------------\n");
+
+	print_ascii_tree(btree->root);
+
+	printf("--------------ll_rotate e-----------------\n");
 	return top;
 }
 
@@ -88,71 +100,65 @@ Case 3	当前节点的父节点是红色，叔叔节点是黑色，且当前节�
  */
 static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_node_t *node)
 {
-	binary_tree_node_t *current_node = node;
+	binary_tree_node_t *cur_node = node;
 	binary_tree_node_t *uncle_node = NULL;
-	while (current_node->parent && current_node->parent->color == RED)
+	while (p(cur_node) && color(p(cur_node)) == RED)
 	{
-		if (current_node->parent->parent == NULL)
+		if (p(p(cur_node)) == NULL)
 		{
 			break;
 		}
 
-		if (current_node->parent == current_node->parent->parent->lchild) //父节点是祖父结点的左孩子
+		if (p(cur_node) == left(p(p(cur_node)))) //父节点是祖父结点的左孩子
 		{
-			uncle_node = current_node->parent->parent->rchild; //祖父结点的右孩子-叔叔结点
-			if (uncle_node == NULL || uncle_node->color == RED) //1 .叔叔是红色
+			uncle_node = right(p(p(cur_node))); //祖父结点的右孩子-叔叔结点
+			if (uncle_node != NULL && color(uncle_node) == RED) //1 .叔叔是红色
 			{
-				current_node->parent->color = BLACK; //将“父节点”设为黑色。
+				color(p(cur_node)) = BLACK; //将“父节点”设为黑色。
 				if (uncle_node != NULL)
 				{
-					uncle_node->color = BLACK; //将“叔叔节点”设为黑色。	
+					color(uncle_node) = BLACK; //将“叔叔节点”设为黑色。	
 				}
-				current_node->parent->parent->color = RED; //将“祖父节点”设为“红色”。
-				current_node = current_node->parent->parent;
+				color(p(p(cur_node))) = RED; //将“祖父节点”设为“红色”。
+				cur_node = p(p(cur_node));
 			}
 			else //叔叔是黑色
 			{
-				if (current_node == current_node->parent->rchild)
+				if (cur_node == right(p(cur_node)))
 				{
-					current_node = current_node->parent;
-					ll_rotate(btree, current_node);
+					cur_node = p(cur_node);
+					ll_rotate(btree, cur_node);
 				}
 				else
 				{
-					current_node->parent->color = BLACK;
-					current_node->parent->parent->color = RED;
-					rr_rotate(btree, current_node->parent->parent);
+					color(p(cur_node)) = BLACK;
+					color(p(p(cur_node))) = RED;
+					rr_rotate(btree, p(p(cur_node)));
 				}
 			}
-
 		}
 		else
 		{
-			uncle_node = current_node->parent->parent->lchild; //祖父结点的右孩子-叔叔结点
-
-			//叔叔结点可能不存在， 此时可以假设叔叔结点为红色
-			if (uncle_node == NULL || uncle_node->color == RED) //1 .叔叔是红色
+			uncle_node = left(p(p(cur_node))); //祖父结点的右孩子-叔叔结点
+			if (uncle_node != NULL && color(uncle_node) == RED) //1 .叔叔是红色
 			{
-				current_node->parent->color = BLACK; //将“父节点”设为黑色。
-				if (uncle_node != NULL)
-				{
-					uncle_node->color = BLACK; //将“叔叔节点”设为黑色。	
-				}
-				current_node->parent->parent->color = RED; //将“祖父节点”设为“红色”。
-				current_node = current_node->parent->parent;
+				color(p(cur_node)) = BLACK; //将“父节点”设为黑色。
+				color(uncle_node) = BLACK; //将“叔叔节点”设为黑色。	
+				color(p(p(cur_node))) = RED; //将“祖父节点”设为“红色”。
+				cur_node = p(p(cur_node));
 			}
 			else //叔叔是黑色
 			{
-				if (current_node == current_node->parent->lchild)
+				if (cur_node == left(p(cur_node)))
 				{
-					current_node = current_node->parent;
-					ll_rotate(btree, current_node);
+					cur_node = p(cur_node);
+					rr_rotate(btree, cur_node);
 				}
 				else
 				{
-					current_node->parent->color = BLACK;
-					current_node->parent->parent->color = RED;
-					rr_rotate(btree, current_node->parent->parent);
+					color(p(cur_node)) = BLACK;
+					color(p(p(cur_node))) = RED;
+					ll_rotate(btree, p(p(cur_node)));
 				}
 			}
 		}

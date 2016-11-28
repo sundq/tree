@@ -23,6 +23,12 @@ extern "C"
 #define MAX_HEIGHT 1000
 #define INFINITY (1<<20)
 
+#define p(x) (x->parent)
+#define left(x) (x->lchild)
+#define right(x) (x->rchild)  
+#define color(x) (x->color)
+
+
 typedef struct binary_tree_node binary_tree_node_t;
 typedef struct binary_tree binary_tree_t;
 typedef enum rb_color { RED = 1, BLACK} rb_color_t;
