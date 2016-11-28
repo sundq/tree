@@ -25,32 +25,32 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 
 	while (unbalance_node != NULL)
 	{
-		ldeepth = binary_tree_deepth_sub_tree(unbalance_node->lchild);
-		rdeepth = binary_tree_deepth_sub_tree(unbalance_node->rchild);
-		p_node = unbalance_node->parent;
+		ldeepth = binary_tree_deepth_sub_tree(left(unbalance_node));
+		rdeepth = binary_tree_deepth_sub_tree(right(unbalance_node));
+		p_node = p(unbalance_node);
 		if (ldeepth - rdeepth != 2 && ldeepth - rdeepth != -2)
 		{
 			unbalance_node = p_node;
 			continue;
 		}
 
-		taller_child_node = ldeepth > rdeepth ? unbalance_node->lchild : unbalance_node->rchild;
-		ldeepth = binary_tree_deepth_sub_tree(taller_child_node->lchild);
-		rdeepth = binary_tree_deepth_sub_tree(taller_child_node->rchild);
-		taller_grandson_child = ldeepth > rdeepth ? taller_child_node->lchild : taller_child_node->rchild;
+		taller_child_node = ldeepth > rdeepth ? left(unbalance_node) : right(unbalance_node);
+		ldeepth = binary_tree_deepth_sub_tree(left(taller_child_node));
+		rdeepth = binary_tree_deepth_sub_tree(right(taller_child_node));
+		taller_grandson_child = ldeepth > rdeepth ? left(taller_child_node) : right(taller_child_node);
 #if TREE_DEBUG
 		printf("unbalance node is...%d\n", *(int *) (unbalance_node->data));
 #endif
 
-		if (unbalance_node->lchild == taller_child_node && taller_child_node->lchild == taller_grandson_child)
+		if (left(unbalance_node) == taller_child_node && left(taller_child_node) == taller_grandson_child)
 		{
-			top = binary_tree_right_rotate(btree, unbalance_node); //LL rotate
+			top = binary_tree_right_rotate(btree, unbalance_node); //R rotate
 		}
-		else if (unbalance_node->rchild == taller_child_node && taller_child_node->rchild == taller_grandson_child)
+		else if (right(unbalance_node) == taller_child_node && right(taller_child_node) == taller_grandson_child)
 		{
-			top = binary_tree_left_rotate(btree, unbalance_node); //RR rotate
+			top = binary_tree_left_rotate(btree, unbalance_node); //L rotate
 		}
-		else if (unbalance_node->lchild == taller_child_node && taller_child_node->rchild == taller_grandson_child)
+		else if (left(unbalance_node) == taller_child_node && right(taller_child_node) == taller_grandson_child)
 		{
 			top = lr_rotate(btree, unbalance_node); //LR rotate	
 		}
@@ -58,10 +58,6 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 		{
 			top = rl_rotate(btree, unbalance_node); //RL rotate	
 		}
-#if TREE_DEBUG
-		printf("after rotate subtree...\n");
-		print_ascii_tree(top);
-#endif
 		unbalance_node = p_node;
 #if TREE_DEBUG
 		printf("after rotate...\n");
