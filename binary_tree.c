@@ -7,6 +7,71 @@ static int release_node(void *a)
 	return 0;
 }
 
+binary_tree_node_t *binary_tree_right_rotate(binary_tree_t *btree, binary_tree_node_t *node)
+{
+    binary_tree_node_t *top = left(node);
+    binary_tree_node_t *p_node = p(node);
+
+    left(node) = right(top);
+    if (right(top) != NULL)
+    {
+        p(right(top)) = node;
+    }
+
+    right(top) = node;
+    p(node) = top;
+    if (p_node != NULL)
+    {
+        if (left(p_node) == node)
+        {
+            left(p_node) = top;
+        }
+        else
+        {
+            right(p_node) = top;
+        }
+    }
+    else
+    {
+        btree->root = top;
+    }
+    p(top) = p_node;
+    return top;
+}
+
+binary_tree_node_t *binary_tree_left_rotate(binary_tree_t *btree, binary_tree_node_t *node)
+{
+    binary_tree_node_t *top = node->rchild;
+    binary_tree_node_t *p_node = node->parent;
+
+    right(node) = left(top);
+    if (left(top) != NULL)
+    {
+        p(left(top)) = node;
+    }
+
+    left(top) = node;
+    p(node) = top;
+
+    if (p_node != NULL)
+    {
+        if (left(p_node) == node)
+        {
+            left(p_node) = top;
+        }
+        else
+        {
+            right(p_node) = top;
+        }
+    }
+    else
+    {
+        btree->root = top;
+    }
+    p(top) = p_node;
+    return top;
+}
+
 
 binary_tree_t *binary_tree_init(compare_func_t func)
 {

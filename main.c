@@ -59,7 +59,8 @@ int main(int argc, char** argv)
 			*del_tmp = 85;
 		}
 		printf("%d-------\n", *tmp);
-		binary_tree_rb_add(t, tmp);
+//		binary_tree_rb_add(t, tmp);
+		binary_tree_avl_add(t, tmp);
 	    print_ascii_tree(t->root);
 	}
 //	printf("xxxxxxxxxxtree size:%lu\n", t->size);

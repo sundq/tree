@@ -31,7 +31,11 @@ extern "C"
 
 typedef struct binary_tree_node binary_tree_node_t;
 typedef struct binary_tree binary_tree_t;
-typedef enum rb_color { RED = 1, BLACK} rb_color_t;
+
+typedef enum rb_color
+{
+    RED = 1, BLACK
+} rb_color_t;
 typedef int (* compare_func_t)(void *src, void *dst);
 typedef int (* traversal_callback)(void *data);
 
@@ -62,12 +66,17 @@ binary_tree_node_t *binary_tree_get(binary_tree_t *t, void *data);
 binary_tree_node_t *binary_tree_del(binary_tree_t *t, void *data);
 binary_tree_node_t *binary_tree_avl_del(binary_tree_t *t, void *data);
 binary_tree_node_t *binary_tree_rb_del(binary_tree_t *t, void *data);
+binary_tree_node_t *binary_tree_left_rotate(binary_tree_t *btree, binary_tree_node_t *node);
+binary_tree_node_t *binary_tree_right_rotate(binary_tree_t *btree, binary_tree_node_t *node);
 int binary_tree_range(binary_tree_t *t, void *max_data, void *min_data);
 int binary_tree_inorder_traversal(binary_tree_t *t, traversal_callback cb);
 int binary_tree_bfs_traversal(binary_tree_t *t, traversal_callback cb);
 int binary_tree_bfs_traversal_subtree(binary_tree_node_t *t, traversal_callback cb);
 int binary_tree_deepth_sub_tree(binary_tree_node_t *t);
 void print_ascii_tree(binary_tree_node_t * t);
+
+
+
 #ifdef	__cplusplus
 }
 #endif

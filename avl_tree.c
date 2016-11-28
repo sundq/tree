@@ -1,47 +1,16 @@
 #include "binary_tree.h"
 
 //add a node for AVL tree
-
-static binary_tree_node_t *ll_rotate(binary_tree_node_t *node)
+static inline binary_tree_node_t *lr_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
-	binary_tree_node_t *top = node->lchild;
-
-	node->lchild = top->rchild;
-	if (top->rchild != NULL)
-	{
-		top->rchild->parent = node;
-	}
-
-	top->rchild = node;
-	node->parent = top;
-	return top;
+	left(node) = binary_tree_left_rotate(btree, node->lchild);
+	return binary_tree_right_rotate(btree, node);
 }
 
-static binary_tree_node_t *rr_rotate(binary_tree_node_t *node)
+static inline binary_tree_node_t *rl_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
-	binary_tree_node_t *top = node->rchild;
-
-	node->rchild = top->lchild;
-	if (top->lchild != NULL)
-	{
-		top->lchild->parent = node;
-	}
-
-	top->lchild = node;
-	node->parent = top;
-	return top;
-}
-
-static binary_tree_node_t *lr_rotate(binary_tree_node_t *node)
-{
-	node->lchild = rr_rotate(node->lchild);
-	return ll_rotate(node);
-}
-
-static binary_tree_node_t *rl_rotate(binary_tree_node_t *node)
-{
-	node->rchild = ll_rotate(node->rchild);
-	return rr_rotate(node);
+	right(node) = binary_tree_right_rotate(btree, node->rchild);
+	return binary_tree_left_rotate(btree, node);
 }
 
 static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_node_t *node)
@@ -75,40 +44,24 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 
 		if (unbalance_node->lchild == taller_child_node && taller_child_node->lchild == taller_grandson_child)
 		{
-			top = ll_rotate(unbalance_node); //LL rotate
+			top = binary_tree_right_rotate(btree, unbalance_node); //LL rotate
 		}
 		else if (unbalance_node->rchild == taller_child_node && taller_child_node->rchild == taller_grandson_child)
 		{
-			top = rr_rotate(unbalance_node); //RR rotate
+			top = binary_tree_left_rotate(btree, unbalance_node); //RR rotate
 		}
 		else if (unbalance_node->lchild == taller_child_node && taller_child_node->rchild == taller_grandson_child)
 		{
-			top = lr_rotate(unbalance_node); //LR rotate	
+			top = lr_rotate(btree, unbalance_node); //LR rotate	
 		}
 		else
 		{
-			top = rl_rotate(unbalance_node); //RL rotate	
+			top = rl_rotate(btree, unbalance_node); //RL rotate	
 		}
 #if TREE_DEBUG
 		printf("after rotate subtree...\n");
 		print_ascii_tree(top);
 #endif
-		top->parent = p_node;
-		if (p_node != NULL)
-		{
-			if (p_node->lchild == unbalance_node)
-			{
-				p_node->lchild = top;
-			}
-			else
-			{
-				p_node->rchild = top;
-			}
-		}
-		else
-		{
-			btree->root = top;
-		}
 		unbalance_node = p_node;
 #if TREE_DEBUG
 		printf("after rotate...\n");

@@ -2,86 +2,6 @@
 
 //add a node for AVL tree
 
-static inline binary_tree_node_t *rr_rotate(binary_tree_t *btree, binary_tree_node_t *node)
-{
-	binary_tree_node_t *top = node->lchild;
-	binary_tree_node_t *p_node = node->parent;
-
-	node->lchild = top->rchild;
-	if (top->rchild != NULL)
-	{
-		top->rchild->parent = node;
-	}
-
-	top->rchild = node;
-	node->parent = top;
-
-	top->parent = p_node;
-
-	if (p_node != NULL)
-	{
-		if (p_node->lchild == node)
-		{
-			p_node->lchild = top;
-		}
-		else
-		{
-			p_node->rchild = top;
-		}
-	}
-	else
-	{
-		btree->root = top;
-	}
-	top->parent = p_node;
-	printf("----------rr_rotate s-----------------------\n");
-
-	print_ascii_tree(btree->root);
-
-	printf("--------------rr_rotate e-----------------\n");
-
-	return top;
-}
-
-static inline binary_tree_node_t *ll_rotate(binary_tree_t *btree, binary_tree_node_t *node)
-{
-	binary_tree_node_t *top = node->rchild;
-	binary_tree_node_t *p_node = node->parent;
-
-	node->rchild = top->lchild;
-	if (top->lchild != NULL)
-	{
-		top->lchild->parent = node;
-	}
-
-	top->lchild = node;
-	node->parent = top;
-
-	if (p_node != NULL)
-	{
-		if (p_node->lchild == node)
-		{
-			p_node->lchild = top;
-		}
-		else
-		{
-			p_node->rchild = top;
-		}
-	}
-	else
-	{
-		btree->root = top;
-	}
-	top->parent = p_node;
-
-	printf("----------ll_rotate s-----------------------\n");
-
-	print_ascii_tree(btree->root);
-
-	printf("--------------ll_rotate e-----------------\n");
-	return top;
-}
-
 /*
  Case 1	当前节点的父节点是红色，且当前节点的祖父节点的另一个子节点（叔叔节点）也是红色。	
 (01) 将“父节点”设为黑色。
@@ -127,13 +47,13 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 				if (cur_node == right(p(cur_node)))
 				{
 					cur_node = p(cur_node);
-					ll_rotate(btree, cur_node);
+					binary_tree_left_rotate(btree, cur_node);
 				}
 				else
 				{
 					color(p(cur_node)) = BLACK;
 					color(p(p(cur_node))) = RED;
-					rr_rotate(btree, p(p(cur_node)));
+					binary_tree_right_rotate(btree, p(p(cur_node)));
 				}
 			}
 		}
@@ -152,13 +72,13 @@ static binary_tree_node_t *make_tree_balance(binary_tree_t *btree, binary_tree_n
 				if (cur_node == left(p(cur_node)))
 				{
 					cur_node = p(cur_node);
-					rr_rotate(btree, cur_node);
+					binary_tree_right_rotate(btree, cur_node);
 				}
 				else
 				{
 					color(p(cur_node)) = BLACK;
 					color(p(p(cur_node))) = RED;
-					ll_rotate(btree, p(p(cur_node)));
+					binary_tree_left_rotate(btree, p(p(cur_node)));
 				}
 			}
 		}
@@ -209,7 +129,7 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->color = BLACK;
 				current_node->parent->color = RED;
-				ll_rotate(btree, current_node->parent->parent);
+				binary_tree_left_rotate(btree, current_node->parent->parent);
 				sibling_node = current_node->parent->rchild;
 			}
 
@@ -222,12 +142,12 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->lchild->color = BLACK;
 				sibling_node->color = RED;
-				rr_rotate(btree, sibling_node);
+				binary_tree_right_rotate(btree, sibling_node);
 				sibling_node = current_node->parent->rchild;
 
 				sibling_node->color = current_node->parent->color;
 				current_node->parent->color = BLACK;
-				ll_rotate(btree, current_node->parent);
+				binary_tree_left_rotate(btree, current_node->parent);
 				current_node = btree->root;
 			}
 		}
@@ -238,7 +158,7 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->color = BLACK;
 				current_node->parent->color = RED;
-				ll_rotate(btree, current_node->parent);
+				binary_tree_left_rotate(btree, current_node->parent);
 				sibling_node = current_node->parent->lchild;
 			}
 
@@ -251,12 +171,12 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 			{
 				sibling_node->rchild->color = BLACK;
 				sibling_node->color = RED;
-				rr_rotate(btree, sibling_node);
+				binary_tree_right_rotate(btree, sibling_node);
 				sibling_node = current_node->parent->lchild;
 
 				sibling_node->color = current_node->parent->color;
 				current_node->parent->color = BLACK;
-				ll_rotate(btree, current_node->parent);
+				binary_tree_left_rotate(btree, current_node->parent);
 				current_node = btree->root;
 			}
 
