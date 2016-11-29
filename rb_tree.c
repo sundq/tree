@@ -126,7 +126,7 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 		if (cur_node == left(p(cur_node)))
 		{
 			sibling_node = right(p(cur_node));
-			if (sibling_node == NULL);
+			if (sibling_node == NULL); 
 			{
 				break;
 			}
@@ -162,6 +162,11 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 		else
 		{
 			sibling_node = left(p(cur_node));
+			if (sibling_node == NULL); 
+			{
+				break;
+			}
+			
 			if (color(sibling_node) == RED)
 			{
 				color(sibling_node) = BLACK;
@@ -210,7 +215,7 @@ binary_tree_node_t *binary_tree_rb_add(binary_tree_t *btree, void *data)
 
 binary_tree_node_t *binary_tree_rb_del(binary_tree_t *btree, void *data)
 {
-	binary_tree_node_t *node = binary_tree_del(btree, data);
+	binary_tree_node_t *node = binary_tree_del(btree, data); // 返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
 	if (node != NULL)
 	{
 	    return make_del_tree_balance(btree, node);		

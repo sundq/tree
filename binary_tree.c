@@ -238,6 +238,7 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 	binary_tree_node_t *parent_successor_node = NULL;
 	binary_tree_node_t *successor_node = node;
 	binary_tree_node_t *successor_child_node = NULL;
+	binary_node_color_t *del_color = 0;
 	if (node != NULL)
 	{
 		if (node->rchild != NULL)
@@ -286,10 +287,13 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 
 
 		node->data = successor_node->data;
+		del_color = color(successor_node);
 		release_memory(successor_node);
 	}
 
-	return successor_child_node; // maybe NULL , delete a leaf node
+	//如果是红黑树且删除的是黑色结点，或者不是红黑树， 返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
+	//如果红黑树且删除的是红色结点，则返回NULL, 表示红黑树不需要做任何特别处理
+	return (del_color == BLACK || del_color == 0) ? successor_child_node : NULL; 
 }
 
 int binary_tree_destory(binary_tree_t *btree)

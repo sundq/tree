@@ -36,14 +36,14 @@ typedef struct binary_tree binary_tree_t;
 typedef enum rb_color
 {
     RED = 1, BLACK
-} rb_color_t;
+} binary_node_color_t;
 typedef int (* compare_func_t)(void *src, void *dst);
 typedef int (* traversal_callback)(void *data);
 
 struct binary_tree_node
 {
     void *data;
-    rb_color_t color; //for rb tree  
+    binary_node_color_t color; //for rb tree  
     size_t height;
     struct binary_tree_node *lchild;
     struct binary_tree_node *rchild;
