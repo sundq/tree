@@ -116,9 +116,9 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 {
 	binary_tree_node_t *sibling_node = NULL;
 	binary_tree_node_t *cur_node = node;
-	
+
 #if TREE_DEBUG
-		printf("cur node is...%d\n", *(int *) (node->data));
+	printf("cur node is...%d\n", *(int *) (node->data));
 #endif	
 
 	while (cur_node != btree->root && color(cur_node) == BLACK)
@@ -126,10 +126,10 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 		if (cur_node == left(p(cur_node)))
 		{
 			sibling_node = right(p(cur_node));
-			if (sibling_node == NULL); 
-			{
-				break;
-			}
+			//			if (sibling_node == NULL); 
+			//			{
+			//				break;
+			//			}
 			if (color(sibling_node) == RED)
 			{
 				color(sibling_node) = BLACK;
@@ -138,12 +138,13 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 				sibling_node = right(p(cur_node));
 			}
 
-			if (color(left(sibling_node)) == BLACK && color(right(sibling_node)) == BLACK)
+			if ((left(sibling_node) == NULL || color(left(sibling_node)) == BLACK) &&
+				(right(sibling_node) == NULL || color(right(sibling_node)) == BLACK))
 			{
 				color(sibling_node) = RED;
 				cur_node = p(cur_node);
 			}
-			else if (color(right(sibling_node)) == BLACK)
+			else if ((right(sibling_node) == NULL || color(right(sibling_node)) == BLACK))
 			{
 				color(left(sibling_node)) = BLACK;
 				color(sibling_node) = RED;
@@ -162,11 +163,11 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 		else
 		{
 			sibling_node = left(p(cur_node));
-			if (sibling_node == NULL); 
+			if (sibling_node == NULL);
 			{
 				break;
 			}
-			
+
 			if (color(sibling_node) == RED)
 			{
 				color(sibling_node) = BLACK;
@@ -218,11 +219,20 @@ binary_tree_node_t *binary_tree_rb_del(binary_tree_t *btree, void *data)
 	binary_tree_node_t *node = binary_tree_del(btree, data); // 返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
 	if (node != NULL)
 	{
-	    return make_del_tree_balance(btree, node);		
-	}
-	else
-	{
-		return node;
-	}
+		make_del_tree_balance(btree, node);
+		if (node->data == NULL)
+		{
+			if (left(p(node)) == node)
+			{
+				left(p(node)) = NULL;
+			}
+			else
+			{
+				right(p(node)) = NULL;
+			}
+			release_memory(node);
+		}
 
+	}
+	return NULL;
 }
