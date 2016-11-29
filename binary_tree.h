@@ -27,6 +27,7 @@ extern "C"
 #define left(x) (x->lchild)
 #define right(x) (x->rchild)  
 #define color(x) (x->color)
+#define h(x) (x->height)
 
 
 typedef struct binary_tree_node binary_tree_node_t;
@@ -43,6 +44,7 @@ struct binary_tree_node
 {
     void *data;
     rb_color_t color; //for rb tree  
+    size_t height;
     struct binary_tree_node *lchild;
     struct binary_tree_node *rchild;
     struct binary_tree_node *parent;

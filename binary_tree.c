@@ -84,18 +84,18 @@ binary_tree_t *binary_tree_init(compare_func_t func)
 
 binary_tree_node_t *binary_tree_add(binary_tree_t *btree, void *data)
 {
-	binary_tree_node_t **current_node = &btree->root;
+	binary_tree_node_t **cur_node = &btree->root;
 	binary_tree_node_t *parent_node = btree->root;
-	while (*current_node != NULL)
+	while (*cur_node != NULL)
 	{
-		parent_node = *current_node;
-		if (btree->compare_func(data, (*current_node)->data) > 0) //rchild child
+		parent_node = *cur_node;
+		if (btree->compare_func(data, (*cur_node)->data) > 0) //rchild child
 		{
-			current_node = &(*current_node)->rchild;
+			cur_node = &(*cur_node)->rchild;
 		}
-		else if (btree->compare_func(data, (*current_node)->data) < 0) //lchild child
+		else if (btree->compare_func(data, (*cur_node)->data) < 0) //lchild child
 		{
-			current_node = &(*current_node)->lchild;
+			cur_node = &(*cur_node)->lchild;
 		}
 		else
 		{
@@ -104,31 +104,31 @@ binary_tree_node_t *binary_tree_add(binary_tree_t *btree, void *data)
 		}
 	}
 
-	if (*current_node == NULL)
+	if (*cur_node == NULL)
 	{
-		*current_node = (binary_tree_node_t *) (allocate_memory(sizeof (binary_tree_node_t)));
-		(*current_node)->data = data;
-		(*current_node)->parent = parent_node;
+		*cur_node = (binary_tree_node_t *) (allocate_memory(sizeof (binary_tree_node_t)));
+		(*cur_node)->data = data;
+		(*cur_node)->parent = parent_node;
 	}
-	return *current_node;
+	return *cur_node;
 }
 
 binary_tree_node_t *binary_tree_get(binary_tree_t *btree, void *data)
 {
-	binary_tree_node_t *current_node = btree->root;
-	while (current_node != NULL)
+	binary_tree_node_t *cur_node = btree->root;
+	while (cur_node != NULL)
 	{
-		if (btree->compare_func(data, current_node->data) > 0) //rchild child
+		if (btree->compare_func(data, cur_node->data) > 0) //rchild child
 		{
-			current_node = current_node->rchild;
+			cur_node = cur_node->rchild;
 		}
-		else if (btree->compare_func(data, current_node->data) < 0) //lchild child
+		else if (btree->compare_func(data, cur_node->data) < 0) //lchild child
 		{
-			current_node = current_node->lchild;
+			cur_node = cur_node->lchild;
 		}
 		else
 		{
-			return current_node;
+			return cur_node;
 		}
 
 	}
@@ -139,33 +139,33 @@ binary_tree_node_t *binary_tree_get(binary_tree_t *btree, void *data)
 
 int binary_tree_inorder_traversal(binary_tree_t *btree, traversal_callback cb)
 {
-	binary_tree_node_t *current_node = btree->root;
+	binary_tree_node_t *cur_node = btree->root;
 	binary_tree_node_t *prev_node = NULL;
-	while (current_node != NULL)
+	while (cur_node != NULL)
 	{
-		if (current_node->lchild == NULL) //the lchild child is NULL, process current node and set current_node to rchild child
+		if (cur_node->lchild == NULL) //the lchild child is NULL, process current node and set current_node to rchild child
 		{
-			cb(current_node->data);
-			current_node = current_node->rchild;
+			cb(cur_node->data);
+			cur_node = cur_node->rchild;
 		}
 		else
 		{
-			prev_node = current_node->lchild;
-			while (prev_node->rchild != NULL && prev_node->rchild != current_node)
+			prev_node = cur_node->lchild;
+			while (prev_node->rchild != NULL && prev_node->rchild != cur_node)
 			{
 				prev_node = prev_node->rchild;
 			}
 
 			if (prev_node->rchild == NULL)
 			{
-				prev_node->rchild = current_node;
-				current_node = current_node->lchild;
+				prev_node->rchild = cur_node;
+				cur_node = cur_node->lchild;
 			}
 			else
 			{
 				prev_node->rchild = NULL;
-				cb(current_node->data);
-				current_node = current_node->rchild;
+				cb(cur_node->data);
+				cur_node = cur_node->rchild;
 			}
 		}
 	}
@@ -289,7 +289,7 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 		release_memory(successor_node);
 	}
 
-	return successor_child_node;
+	return successor_child_node; // maybe NULL , delete a leaf node
 }
 
 int binary_tree_destory(binary_tree_t *btree)

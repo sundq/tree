@@ -4,7 +4,7 @@ queue_t *queue_init(int size)
 {
 	queue_t *q = (queue_t *) allocate_memory(sizeof (queue_t));
 	memset(q, 0, sizeof (queue_t));
-	q->buf = allocate_memory(size);
+	q->buf = allocate_memory(size * sizeof (void *));
 	q->size = size;
 	q->rear = 0;
 	memset(q->buf, 0, size * sizeof (void *));
