@@ -1,6 +1,8 @@
 #include "binary_tree.h"
 #include "./util/queue.h"
 
+static binary_tree_node_t binary_tree_null_node = {NULL, BLACK, 0, NULL, NULL, NULL};
+
 static int release_node(void *a)
 {
 	release_memory(a);
@@ -270,9 +272,7 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 		successor_child_node = successor_node->lchild != NULL ? successor_node->lchild : successor_node->rchild;
 		if (successor_child_node == NULL)
 		{
-			successor_child_node = (binary_tree_node_t *)allocate_memory(sizeof(binary_tree_node_t));
-			memset(successor_child_node, 0, sizeof(binary_tree_node_t));
-			color(successor_child_node) = BLACK;
+			successor_child_node = &binary_tree_null_node;
 		}
 
 

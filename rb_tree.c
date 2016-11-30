@@ -220,7 +220,7 @@ binary_tree_node_t *binary_tree_rb_del(binary_tree_t *btree, void *data)
 	if (node != NULL)
 	{
 		make_del_tree_balance(btree, node);
-		if (node->data == NULL)
+		if (node->data == NULL) //no data node
 		{
 			if (left(p(node)) == node)
 			{
@@ -230,7 +230,6 @@ binary_tree_node_t *binary_tree_rb_del(binary_tree_t *btree, void *data)
 			{
 				right(p(node)) = NULL;
 			}
-			release_memory(node);
 		}
 
 	}
