@@ -106,8 +106,7 @@ asciinode * build_ascii_tree_recursive(binary_tree_node_t * t)
 	else
 	{
 		sprintf(node->label, "%d", *((int *)(t->data)));
-	    node->lablen = strlen(node->label) ;
-		
+	    node->lablen = strlen(node->label);		
 	}
 		
 	return node;

@@ -1,5 +1,82 @@
 #include "binary_tree.h"
 
+static binary_tree_node_t binary_tree_null_node = {NULL, BLACK, 0, NULL, NULL, NULL};
+
+static binary_tree_node_t *binary_rb_tree_del_node(binary_tree_t *btree, void *data)
+{
+	binary_tree_node_t *node = binary_tree_get(btree, data);
+	binary_tree_node_t *parent_successor_node = NULL;
+	binary_tree_node_t *successor_node = node;
+	binary_tree_node_t *successor_child_node = NULL;
+	binary_node_color_t del_color = 0;
+	if (node != NULL)
+	{
+		if (node->rchild != NULL)
+		{
+			parent_successor_node = node;
+			successor_node = node->rchild;
+			while (successor_node->lchild != NULL)
+			{
+				parent_successor_node = successor_node;
+				successor_node = successor_node->lchild;
+			}
+		}
+		else if (node->lchild != NULL)
+		{
+			parent_successor_node = node;
+			successor_node = node->lchild;
+			while (successor_node->rchild != NULL)
+			{
+				parent_successor_node = successor_node;
+				successor_node = successor_node->rchild;
+			}
+		}
+		else
+		{
+			parent_successor_node = node->parent;
+			successor_node = node;
+		}
+
+		successor_child_node = successor_node->lchild != NULL ? successor_node->lchild : successor_node->rchild;
+		
+		//如果删除的是黑色叶子结点，那么返回一个数据是空的不存在的结点， 其父节点为删除结点的父节点
+		if (successor_child_node == NULL)
+		{
+			successor_child_node = &binary_tree_null_node;
+		}
+
+
+		if (parent_successor_node == NULL)
+		{
+			btree->root = NULL;
+		}
+		else if (parent_successor_node->lchild == successor_node)
+		{
+			parent_successor_node->lchild = successor_child_node;
+		}
+		else
+		{
+			parent_successor_node->rchild = successor_child_node;
+		}
+		successor_child_node->parent = parent_successor_node;
+
+		node->data = successor_node->data;
+		del_color = color(successor_node);
+		release_memory(successor_node);
+	}
+
+	//如果是红黑树且删除的是黑色结点，返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
+	if (del_color == BLACK)
+	{
+		color(successor_child_node) = BLACK;
+ 	}
+	else
+	{
+		color(successor_child_node) = RED;
+	}
+	return successor_child_node;
+}
+
 //add a node for AVL tree
 
 /*
@@ -216,22 +293,18 @@ binary_tree_node_t *binary_tree_rb_add(binary_tree_t *btree, void *data)
 
 binary_tree_node_t *binary_tree_rb_del(binary_tree_t *btree, void *data)
 {
-	binary_tree_node_t *node = binary_tree_del(btree, data); // 返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
-	if (node != NULL)
+	binary_tree_node_t *node = binary_rb_tree_del_node(btree, data); // 返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
+	make_del_tree_balance(btree, node);
+	if (node->data == NULL) //del no data node
 	{
-		make_del_tree_balance(btree, node);
-		if (node->data == NULL) //no data node
+		if (left(p(node)) == node)
 		{
-			if (left(p(node)) == node)
-			{
-				left(p(node)) = NULL;
-			}
-			else
-			{
-				right(p(node)) = NULL;
-			}
+			left(p(node)) = NULL;
 		}
-
+		else
+		{
+			right(p(node)) = NULL;
+		}
 	}
-	return NULL;
+	return p(node);
 }

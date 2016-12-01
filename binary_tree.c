@@ -1,8 +1,6 @@
 #include "binary_tree.h"
 #include "./util/queue.h"
 
-static binary_tree_node_t binary_tree_null_node = {NULL, BLACK, 0, NULL, NULL, NULL};
-
 static int release_node(void *a)
 {
 	release_memory(a);
@@ -270,12 +268,6 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 		}
 
 		successor_child_node = successor_node->lchild != NULL ? successor_node->lchild : successor_node->rchild;
-		if (successor_child_node == NULL)
-		{
-			successor_child_node = &binary_tree_null_node;
-		}
-
-
 		if (parent_successor_node == NULL)
 		{
 			btree->root = NULL;
@@ -295,17 +287,7 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
 		release_memory(successor_node);
 	}
 
-	//如果是红黑树且删除的是黑色结点，或者不是红黑树， 返回结点为删除结点的左孩子或者右孩子(删除的后继结点至多只有一个孩子)
-	//如果红黑树且删除的是红色结点，则返回NULL, 表示红黑树不需要做任何特别处理
-	if (del_color == BLACK)
-	{
-		return successor_child_node;
- 	}
-	else
-	{
-		color(successor_child_node) = RED;
- 		return successor_child_node; 
-	}
+	return parent_successor_node;
 }
 
 int binary_tree_destory(binary_tree_t *btree)
