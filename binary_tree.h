@@ -28,6 +28,7 @@ extern "C"
 #define right(x) (x->rchild)  
 #define color(x) (x->color)
 #define h(x) (x->height)
+#define max(x, y) (x > y ? x : y)
 
 
 typedef struct binary_tree_node binary_tree_node_t;

@@ -7,6 +7,18 @@ static int release_node(void *a)
 	return 0;
 }
 
+static int reset_height_tree_node(binary_tree_node_t *node)
+{
+	binary_tree_node_t *cur_node = node;
+	while (p(cur_node) != NULL)
+	{
+		h(p(cur_node)) = h(cur_node) + 1;
+		cur_node = p(cur_node);
+	}
+	
+	return 0;
+}
+
 binary_tree_node_t *binary_tree_right_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
 	binary_tree_node_t *top = left(node);
@@ -36,6 +48,9 @@ binary_tree_node_t *binary_tree_right_rotate(binary_tree_t *btree, binary_tree_n
 		btree->root = top;
 	}
 	p(top) = p_node;
+	
+	h(node) = max(binary_tree_deepth_sub_tree(node->lchild), binary_tree_deepth_sub_tree(node->rchild)) + 1;
+	reset_height_tree_node(node);
 	return top;
 }
 
@@ -69,6 +84,9 @@ binary_tree_node_t *binary_tree_left_rotate(binary_tree_t *btree, binary_tree_no
 		btree->root = top;
 	}
 	p(top) = p_node;
+
+	h(node) = max(binary_tree_deepth_sub_tree(node->lchild), binary_tree_deepth_sub_tree(node->rchild)) + 1; 
+	reset_height_tree_node(node);
 	return top;
 }
 
@@ -108,8 +126,10 @@ binary_tree_node_t *binary_tree_add(binary_tree_t *btree, void *data)
 	{
 		*cur_node = (binary_tree_node_t *) (allocate_memory(sizeof (binary_tree_node_t)));
 		(*cur_node)->data = data;
+		(*cur_node)->height = 1;
 		(*cur_node)->parent = parent_node;
 	}
+	reset_height_tree_node(*cur_node);
 	return *cur_node;
 }
 
@@ -229,7 +249,7 @@ int binary_tree_bfs_traversal(binary_tree_t *btree, traversal_callback cb)
 
 int binary_tree_deepth_sub_tree(binary_tree_node_t *subtree)
 {
-	return binary_tree_bfs_traversal_subtree(subtree, NULL);
+	return subtree != NULL? subtree->height : 0;
 }
 
 binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
