@@ -202,7 +202,11 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 	{
 		if (cur_node == left(p(cur_node)))
 		{
+
 			sibling_node = right(p(cur_node));
+			/*考虑一下兄弟结点是否有不存在的情况，
+			 如果兄弟结点不存在，想象一下，在删除之前这个树是什么样子，还是一颗红黑树么
+			 */
 			//			if (sibling_node == NULL); 
 			//			{
 			//				break;
@@ -219,7 +223,7 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 				(right(sibling_node) == NULL || color(right(sibling_node)) == BLACK))
 			{
 				color(sibling_node) = RED;
-				cur_node = p(cur_node);
+				cur_node = p(cur_node); //如果兄弟结点为红色，这里的操作会跳出循环，操作完成 
 			}
 			else if ((right(sibling_node) == NULL || color(right(sibling_node)) == BLACK))
 			{
@@ -240,10 +244,10 @@ static binary_tree_node_t *make_del_tree_balance(binary_tree_t *btree, binary_tr
 		else
 		{
 			sibling_node = left(p(cur_node));
-			if (sibling_node == NULL);
-			{
-				break;
-			}
+//			if (sibling_node == NULL);
+//			{
+//				break;
+//			}
 
 			if (color(sibling_node) == RED)
 			{

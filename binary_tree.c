@@ -56,8 +56,8 @@ binary_tree_node_t *binary_tree_right_rotate(binary_tree_t *btree, binary_tree_n
 
 binary_tree_node_t *binary_tree_left_rotate(binary_tree_t *btree, binary_tree_node_t *node)
 {
-	binary_tree_node_t *top = node->rchild;
-	binary_tree_node_t *p_node = node->parent;
+	binary_tree_node_t *top = right(node);
+	binary_tree_node_t *p_node = p(node);
 
 	right(node) = left(top);
 	if (left(top) != NULL)
