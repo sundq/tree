@@ -1,16 +1,32 @@
 #include "./b_tree.h"
 #include "./util/memory_pool.h"
 
-static inline b_tree_node_t *create_b_tree_node(b_tree *root)
+static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
 {
 	b_tree_node_t *node = (b_tree_node_t *) allocate_memory(sizeof (b_tree_node_t));
 	node->parent = NULL;
-	node->child = allocate_memory(sizeof (b_tree_node_t) * root->order);
+	node->child = (b_tree_node_t **)allocate_memory(sizeof (b_tree_node_t) * root->order);
 	node->key = allocate_memory(sizeof (int64_t) * root->order);
 	node->key_num = 0;
+	node->leaf = 1;
+	
+	return node;
 }
 
-static inline int insert_key_to_tree_node(b_tree *btree, b_tree_node_t node, void *key)
+static inline int find_child_ptr(b_tree_node_t *node)
+{
+	b_tree_node_t *parent = node->parent;
+	for (int i = 0; i <= parent->key_num; i++)
+	{
+		if (parent->child[i] == node)
+		{
+			return i;
+		}
+	}
+	return 0;
+}
+
+static inline int insert_key_to_tree_node(b_tree_t *btree, b_tree_node_t *node, void *key)
 {
 	int i = 0;
 	for (i = 0; i < node->key_num; i++)
@@ -27,6 +43,17 @@ static inline int insert_key_to_tree_node(b_tree *btree, b_tree_node_t node, voi
 	node->key[i] = (int64_t) key;
 	node->key_num++;
 	return i;
+}
+
+static inline int del_key_from_tree_node(b_tree_t *btree, b_tree_node_t *node, int key_index)
+{
+	for (int i = key_index; i <= btree->order; i++)
+	{
+		node->key[i] = node->key[i + 1];
+		node->child[i] = node->child[i + 1];
+	}
+	node->key_num--;
+	return 0;
 }
 
 //m为b tree的阶
@@ -66,10 +93,9 @@ void *b_tree_find(b_tree_t *btree, void *key)
 int b_tree_add_node(b_tree_t *btree, void *key)
 {
 	b_tree_node_t *current_node = btree->root;
-
 	//find the node which new key insert
-	int ret = 0;
-	while (ret == 0)
+	int loop_over = 0;
+	while (loop_over == 0)
 	{
 		for (int i = 0; i < current_node->key_num; i++)
 		{
@@ -81,7 +107,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
 				}
 				else
 				{
-					ret = 1;
+					loop_over = 1;
 				}
 				break;
 			}
@@ -97,7 +123,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
 		}
 		else
 		{
-			break; //found
+			break;
 		}
 	}
 
@@ -111,7 +137,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
 		{
 			new->key[m] = current_node->key[i];
 			new->key_num++;
-			current_node->key[i] = NULL;
+			current_node->key[i] = 0;
 			current_node->child[i] = NULL;
 		}
 		current_node->key_num = current_node->key_num / 2;
@@ -119,6 +145,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
 		if (parent != NULL)
 		{
 			parent = create_b_tree_node(btree);
+			parent->leaf = 0;
 			btree->root = parent;
 		}
 		new->parent = parent;
@@ -138,42 +165,71 @@ ok:
 
 int b_tree_del_node(b_tree_t *btree, void *key)
 {
-	int64_t ret = 0;
 	int index_node = 0;
 	b_tree_node_t *current_node = btree->root;
-	while (1)
+	while (current_node != NULL)
 	{
 		for (index_node = 0; index_node < current_node->key_num; index_node++)
 		{
 			if (btree->compare(key, (void *) current_node->key[index_node]) < 0)
 			{
-				if (current_node->child[index_node] == NULL)
-				{
-					goto find_pos;
-				}
 				current_node = current_node->child[index_node];
 			}
 			else if (btree->compare(key, (void *) current_node->key[index_node]) == 0)
 			{
-				ret = current_node->key[index_node];
+				goto node_del; //find
 			}
-		}
-		if (current_node->child[current_node->key_num] == NULL)
-		{
-			goto find_pos;
 		}
 		current_node = current_node->child[current_node->key_num];
 	}
 
-find_pos:
-	if (ret != 0)
+node_del:
+	if (current_node != NULL)
 	{
-
-		for (int i = index_node; i < current_node->key_num; i++)
+		del_key_from_tree_node(btree, current_node, index_node);
+		while (current_node != NULL && current_node->key_num < ceil(btree->order, 2) - 1) //至少有ceil(m/2)-1个关键字
 		{
-			current_node->key[i] = current_node->key[i + 1];
+			b_tree_node_t *successor_node = current_node->child[current_node->key_num];
+			if (!current_node->leaf) //非叶子结点
+			{
+				while (successor_node->child[0] != NULL)//找后继结点
+				{
+					successor_node = successor_node->child[0];
+				}
+				current_node->key[index_node] = successor_node->key[0];
+				del_key_from_tree_node(btree, successor_node, 0);
+				current_node = successor_node;
+				index_node = 0;
+			}
+			
+			int index = find_child_ptr(current_node);
+			b_tree_node_t *l_sibling = index > 1 ? current_node->parent->child[index - 1] : NULL;
+			b_tree_node_t *r_sibling = index < btree->order - 2 ? current_node->parent->child[index + 1] : NULL;
+			
+			if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2))
+			{
+				current_node->key[index_node] = current_node->parent->key[index];
+				current_node->parent->key[index] = l_sibling->key[l_sibling->key_num - 1];
+				del_key_from_tree_node(btree, l_sibling, l_sibling->key_num - 1);
+			}
+			else if (r_sibling != NULL && r_sibling->key_num >= ceil(btree->order, 2))
+			{
+				current_node->key[index_node] = current_node->parent->key[index + 1];
+				current_node->parent->key[index + 1] = r_sibling->key[0];
+				del_key_from_tree_node(btree, r_sibling, 0);
+			}
+			else
+			{
+				insert_key_to_tree_node(btree, l_sibling, (void *)current_node->parent->key[index]);
+				del_key_from_tree_node(btree, current_node->parent, index);
+				for(int i = 0; i< current_node->key_num; i++)
+				{
+					l_sibling->key[l_sibling->key_num + i] = current_node->key[i];//合并	
+				} 
+				release_memory(current_node);
+				current_node = current_node->parent;
+			}
 		}
-		current_node->key_num--;
 	}
 
 	return 0;

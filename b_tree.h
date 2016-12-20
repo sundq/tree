@@ -18,6 +18,8 @@ extern "C"
 #include <string.h>
 #include <memory.h> 
 
+#define ceil(m, n) (m/n + m%n)    
+    
 typedef struct b_tree_node b_tree_node_t;
 typedef struct b_tree b_tree_t;
 typedef int (* compare_func_t)(void *src, void *dst);
@@ -25,14 +27,15 @@ typedef int (* compare_func_t)(void *src, void *dst);
 struct b_tree_node
 {
     size_t key_num; //实际关键字个数
-    struct b_tree_node *parent; //
-    struct b_tree_node *child;
+    b_tree_node_t *parent; //
+    b_tree_node_t **child;
     int64_t *key; //关键字数组
+    int leaf;
 };
 
 struct b_tree
 {
-    struct b_tree_node *root;
+    b_tree_node_t *root;
     size_t order;//b tree的阶
     size_t node_num;
     compare_func_t compare;
