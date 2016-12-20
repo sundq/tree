@@ -17,12 +17,14 @@ extern "C"
 #include <stdio.h>
 #include <string.h>
 #include <memory.h> 
+#include "./binary_tree.h"
+
 
 #define ceil(m, n) (m/n + m%n)    
     
 typedef struct b_tree_node b_tree_node_t;
 typedef struct b_tree b_tree_t;
-typedef int (* compare_func_t)(void *src, void *dst);
+//typedef int (* compare_func_t)(void *src, void *dst);
 
 struct b_tree_node
 {
@@ -40,7 +42,7 @@ struct b_tree
     size_t node_num;
     compare_func_t compare;
 };
-
+b_tree_t *b_tree_init(size_t m, compare_func_t func);
 void *b_tree_find(b_tree_t *btree, void *key);
 int b_tree_add_node(b_tree_t *btree, void *key);
 int b_tree_del_node(b_tree_t *btree, void *key);

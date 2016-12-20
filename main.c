@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "binary_tree.h"
+#include "b_tree.h"
 
 /*
  * 
@@ -35,7 +36,7 @@ static int traverse_bfs(void *a)
 	return 0;
 }
 
-int main(int argc, char** argv)
+void rb_tree_test()
 {
 	int *del_tmp = malloc(sizeof (int));
 	srand((unsigned) time(NULL));
@@ -85,19 +86,28 @@ int main(int argc, char** argv)
 		print_ascii_tree(t->root);
 
 	printf("delete a red-black tree ok.\n");
-
-
-	//	printf("xxxxxxxxxxtree size:%lu\n", t->size);
-
 	printf("\n");
-	//	binary_tree_bfs_traversal(t, traverse_bfs);
-	//	printf("del :%d\n", *del_tmp);
-	//	binary_tree_avl_del(t, del_tmp);
-	//	binary_tree_rb_del(t, del_tmp);
-	//    print_ascii_tree(t->root);
-	//	binary_tree_inorder_traversal(t, traverse);
-	//    printf("%d..\n", printf("\033[31m69\033[0m"));
- 	printf("\n");
+	
+}
+
+void b_tree_test()
+{
+	int num = 26;
+	srand((unsigned) time(NULL));
+	b_tree_t *t = b_tree_init(5,compare);	
+	for(int i = 0; i < num; i++)
+	{
+		int *tmp = malloc(sizeof (int));
+		*tmp = rand() % 100;
+		b_tree_add_node(t, tmp);
+//     	print_ascii_tree(t->root);		
+	}	
+}
+
+int main(int argc, char** argv)
+{
+//	rb_tree_test();
+	b_tree_test();
 	return (EXIT_SUCCESS);
 }
 

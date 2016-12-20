@@ -36,7 +36,7 @@ static inline int insert_key_to_tree_node(b_tree_t *btree, b_tree_node_t *node, 
 			break; //node->key[i] = (int64_t) key;
 		}
 	}
-	for (int m = node->key_num; m < i; m--)
+	for (int m = node->key_num; m > i; m--)
 	{
 		node->key[m] = node->key[m - 1];
 	}
@@ -133,7 +133,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
 		int64_t middle_key = current_node->key[current_node->key_num / 2];
 		b_tree_node_t *parent = current_node->parent;
 		b_tree_node_t *new = create_b_tree_node(btree);
-		for (int i = current_node->key_num / 2 + 1, m = 0; i <= current_node->key_num; i++, m++)
+		for (int i = current_node->key_num / 2 + 1, m = 0; i < current_node->key_num; i++, m++)
 		{
 			new->key[m] = current_node->key[i];
 			new->key_num++;
@@ -142,7 +142,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
 		}
 		current_node->key_num = current_node->key_num / 2;
 
-		if (parent != NULL)
+		if (parent == NULL)
 		{
 			parent = create_b_tree_node(btree);
 			parent->leaf = 0;
