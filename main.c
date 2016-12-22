@@ -53,17 +53,17 @@ void rb_tree_test()
 	//	int test[] = {639, 371, 888, 66, 405, 389, 478, 622};
 	int num = 1000 * 1000 * 10;
 	int test[] = {557, 320, 854, 255, 527, 789, 982, 182};
-/*	
-	for(int i = 0; i < num; i++)
-	{
-		int *tmp = malloc(sizeof (int));
-		*tmp = rand() % 100;//i;
-		binary_tree_avl_add(t, tmp);
-     	print_ascii_tree(t->root);
+	/*	
+		for(int i = 0; i < num; i++)
+		{
+			int *tmp = malloc(sizeof (int));
+	 *tmp = rand() % 100;//i;
+			binary_tree_avl_add(t, tmp);
+			print_ascii_tree(t->root);
 		
-	}
-	print_ascii_tree(t->root);
-*/	
+		}
+		print_ascii_tree(t->root);
+	 */
 
 
 	for (int i = 0; i < num; i++)
@@ -77,36 +77,56 @@ void rb_tree_test()
 		binary_tree_rb_add(t, tmp);
 	}
 	printf("build a red-black tree ok.\n");
-//	print_ascii_tree(t->root);
+	//	print_ascii_tree(t->root);
 	for (int i = 0; i < num - 2; i++)
 	{
 		int tmp = i;
 		binary_tree_rb_del(t, &tmp);
 	}
-		print_ascii_tree(t->root);
+	print_ascii_tree(t->root);
 
 	printf("delete a red-black tree ok.\n");
 	printf("\n");
-	
+
 }
 
 void b_tree_test()
 {
-	int num = 26;
+	int cache[26] = {0};
+	int test[] = {3,24,9,23,5,1,22,21,18,13,11,25,6,12,20,19};
+
+	int num = sizeof(test)/sizeof(int);
 	srand((unsigned) time(NULL));
-	b_tree_t *t = b_tree_init(5,compare);	
-	for(int i = 0; i < num; i++)
+	b_tree_t *t = b_tree_init(5, compare);
+	for (int i = 0; i < num; i++)
 	{
 		int *tmp = malloc(sizeof (int));
-		*tmp = rand() % 100;
+		*tmp = test[i];//rand() % num;
+		printf("add %d\n", *tmp);
+		cache[i] = *tmp;
 		b_tree_add_node(t, tmp);
-//     	print_ascii_tree(t->root);		
-	}	
+		printf("*****************************1\n");
+		b_tree_bfs_traversal_subtree(t->root, traverse);
+		printf("*****************************2\n\n\n");
+
+	}
+
+	for (int i = 0; i < num; i++)
+	{
+		int *tmp = malloc(sizeof (int));
+		*tmp = cache[i];
+		printf("DEL %d\n", *tmp);
+		b_tree_del_node(t, tmp);
+		printf("==============================1\n");
+		b_tree_bfs_traversal_subtree(t->root, traverse);
+		printf("==============================2\n\n\n");
+		
+	}
 }
 
 int main(int argc, char** argv)
 {
-//	rb_tree_test();
+	//	rb_tree_test();
 	b_tree_test();
 	return (EXIT_SUCCESS);
 }

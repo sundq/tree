@@ -18,6 +18,7 @@ extern "C"
 #include <string.h>
 #include <memory.h> 
 #include "./binary_tree.h"
+#include "./util/queue.h"
 
 
 #define ceil(m, n) (m/n + m%n)    
@@ -46,6 +47,7 @@ b_tree_t *b_tree_init(size_t m, compare_func_t func);
 void *b_tree_find(b_tree_t *btree, void *key);
 int b_tree_add_node(b_tree_t *btree, void *key);
 int b_tree_del_node(b_tree_t *btree, void *key);
+int b_tree_bfs_traversal_subtree(b_tree_node_t *subtree, traversal_callback cb);
 
 
 #ifdef	__cplusplus
