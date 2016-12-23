@@ -47,7 +47,7 @@ static inline int insert_key_to_tree_node(b_tree_t *btree, b_tree_node_t *node, 
 
 static inline int del_key_from_tree_node(b_tree_t *btree, b_tree_node_t *node, int key_index)
 {
-	for (int i = key_index; i <= btree->order; i++)
+	for (int i = key_index; i < btree->order - 1; i++)
 	{
 		node->key[i] = node->key[i + 1];
 	}
@@ -81,6 +81,12 @@ int b_tree_bfs_traversal_subtree(b_tree_node_t *subtree, traversal_callback cb)
 	while (!queue_is_empty(q))
 	{
 		b_tree_node_t *node = (b_tree_node_t *) queue_pop(q);
+		if (node == NULL)
+		{
+			printf("|");
+			continue;
+		}
+
 		if (cb != NULL)
 		{
 			for (int i = 0; i < node->key_num; i++)
@@ -93,11 +99,8 @@ int b_tree_bfs_traversal_subtree(b_tree_node_t *subtree, traversal_callback cb)
 		cur_num--;
 		for (int i = 0; i <= node->key_num; i++)
 		{
-			if (node->child[i] != NULL)
-			{
-				queue_push(q, node->child[i]);
-				next_num++;
-			}
+			queue_push(q, node->child[i]);
+			next_num++;
 		}
 
 		if (cur_num == 0)
@@ -232,6 +235,7 @@ int b_tree_del_node(b_tree_t *btree, void *key)
 				index_node++;
 			}
 		}
+		index_node = 0;
 		current_node = current_node->child[current_node->key_num];
 	}
 
@@ -245,7 +249,7 @@ node_del:
 
 		while ((current_node != NULL &&
 			current_node->key_num < ceil(btree->order, 2) - 1 && //至少有ceil(m/2)-1个关键字,除根结点 
-			current_node->parent != NULL) || !current_node->leaf)
+			current_node->parent != NULL))
 		{
 			if (!current_node->leaf) //非叶子结点
 			{
@@ -292,16 +296,16 @@ node_del:
 				}
 				else
 				{
-					insert_key_to_tree_node(btree, r_sibling, (void *) r_sibling->parent->key[index]);
+					insert_key_to_tree_node(btree, r_sibling, (void *) r_sibling->parent->key[index]); //当前结点合并到右兄弟结点
 					del_key_from_tree_node(btree, r_sibling->parent, index);
 					for (int i = 0; i < current_node->key_num; i++)
 					{
 						insert_key_to_tree_node(btree, r_sibling, (void *) current_node->key[i]);
 					}
 				}
-				for (int i = index; i < current_node->parent->key_num; i++)
+				for (int i = index; i <= current_node->parent->key_num; i++)
 				{
-					current_node->parent->child[i] = current_node->parent->child[i + 1];
+					current_node->parent->child[i] = current_node->parent->child[i + 1]; //移动孩子结点指针
 				}
 				release_memory(current_node);
 				current_node = current_node->parent;
