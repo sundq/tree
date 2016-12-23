@@ -172,19 +172,19 @@ int binary_tree_inorder_traversal(binary_tree_t *btree, traversal_callback cb)
       prev_node = cur_node->lchild;
       while (prev_node->rchild != NULL && prev_node->rchild != cur_node)
       {
-	prev_node = prev_node->rchild;
+        prev_node = prev_node->rchild;
       }
 
       if (prev_node->rchild == NULL)
       {
-	prev_node->rchild = cur_node;
-	cur_node = cur_node->lchild;
+        prev_node->rchild = cur_node;
+        cur_node = cur_node->lchild;
       }
       else
       {
-	prev_node->rchild = NULL;
-	cb(cur_node->data);
-	cur_node = cur_node->rchild;
+        prev_node->rchild = NULL;
+        cb(cur_node->data);
+        cur_node = cur_node->rchild;
       }
     }
   }
@@ -264,8 +264,8 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
       successor_node = node->rchild;
       while (successor_node->lchild != NULL)
       {
-	parent_successor_node = successor_node;
-	successor_node = successor_node->lchild;
+        parent_successor_node = successor_node;
+        successor_node = successor_node->lchild;
       }
     }
     else if (node->lchild != NULL)
@@ -274,8 +274,8 @@ binary_tree_node_t *binary_tree_del(binary_tree_t *btree, void *data)
       successor_node = node->lchild;
       while (successor_node->rchild != NULL)
       {
-	parent_successor_node = successor_node;
-	successor_node = successor_node->rchild;
+        parent_successor_node = successor_node;
+        successor_node = successor_node->rchild;
       }
     }
     else

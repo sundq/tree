@@ -5,11 +5,10 @@ static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
 {
   b_tree_node_t *node = (b_tree_node_t *)allocate_memory(sizeof(b_tree_node_t));
   node->parent = NULL;
-  node->child = (b_tree_node_t **)allocate_memory(sizeof(b_tree_node_t) * root->order);
+  node->child = (b_tree_node_t **)allocate_memory(sizeof(b_tree_node_t) * (root->order + 1));
   node->key = allocate_memory(sizeof(int64_t) * root->order);
   node->key_num = 0;
   node->leaf = 1;
-
   return node;
 }
 
@@ -178,19 +177,21 @@ int b_tree_add_node(b_tree_t *btree, void *key)
   insert_key_to_tree_node(btree, current_node, key);
   while (current_node->key_num == btree->order) //分裂
   {
-    //		printf("split...\n");
     int64_t middle_key = current_node->key[current_node->key_num / 2];
     b_tree_node_t *parent = current_node->parent;
     b_tree_node_t *new = create_b_tree_node(btree);
-    for (int i = current_node->key_num / 2 + 1, m = 0; i < current_node->key_num; i++, m++)
+    int i = 0;
+    int m = 0;
+    for (i = current_node->key_num / 2 + 1, m = 0; i < current_node->key_num; i++, m++)
     {
       new->key[m] = current_node->key[i];
       new->key_num++;
+      new->child[m] = current_node->child[i];
       current_node->key[i] = 0;
       current_node->child[i] = NULL;
     }
+    new->child[m] = current_node->child[i];
     current_node->key_num = current_node->key_num / 2;
-
     if (parent == NULL)
     {
       parent = create_b_tree_node(btree);
@@ -200,7 +201,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
     new->parent = parent;
     current_node->parent = parent;
     int index = insert_key_to_tree_node(btree, parent, (void *)middle_key);
-    for (int i = btree->order - 1; i > index + 1; i--)
+    for (int i = btree->order; i > index + 1; i--)
     {
       parent->child[i] = parent->child[i - 1];
     }
