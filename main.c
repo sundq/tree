@@ -24,6 +24,11 @@ static int compare(void *a, void *b)
 
 static int traverse(void *a)
 {
+  if (a == NULL)
+  {
+    printf("NULL ");
+    return 0;
+  }
   printf("%d ", *(int *)a);
   return 0;
 }

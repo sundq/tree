@@ -32,7 +32,7 @@ struct b_tree_node
     size_t key_num; //实际关键字个数
     b_tree_node_t *parent; //
     b_tree_node_t **child;
-    int64_t *key; //关键字数组
+    intptr_t *key; //关键字数组
     int leaf;
 };
 
