@@ -19,6 +19,7 @@ static int compare(void *a, void *b)
 {
   int a1 = *(int *)a;
   int b1 = *(int *)b;
+  //printf("+++++++%d %d\n",a1, b1);
   return a1 - b1;
 }
 
@@ -95,34 +96,39 @@ void rb_tree_test()
 void b_tree_test()
 {
   int cache[1024] = {0};
-  int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
-                457, 913, 936, 431, 381};
-
+  // int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
+  //               457, 913, 936, 431, 381};
+  //int test[] = {22, 95, 60, 88, 1, 93, 85, 73, 63, 50, 47, 40, 44, 44};
+  int test[] = {271, 565, 206, 483, 144, 46, 259, 255, 303};
   int num = sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
-  b_tree_t *t = b_tree_init(5, compare);
+  b_tree_t *t = b_tree_init(4, compare);
+  char xx[100] = {};
   for (int i = 0; i < num; i++)
   {
     int *tmp = malloc(sizeof(int));
-    *tmp = test[i];//rand() % num;
+    *tmp = test[i];//rand() % (num * 20);
     printf("add %d\n", *tmp);
     cache[i] = *tmp;
+    //sprintf(xx, "echo '%d,' >> ./xx", *tmp);
+    //system(xx);
     b_tree_add_node(t, tmp);
     printf("*****************************1\n");
     b_tree_bfs_traversal_subtree(t->root, traverse);
     printf("*****************************2\n\n\n");
   }
+  //system("echo '\n' >> ./xx");
 
-  for (int i = 0; i < num; i++)
-  {
-    int *tmp = malloc(sizeof(int));
-    *tmp = cache[i];
-    printf("DEL %d\n", *tmp);
-    b_tree_del_node(t, tmp);
-    printf("==============================1\n");
-    b_tree_bfs_traversal_subtree(t->root, traverse);
-    printf("==============================2\n\n\n");
-  }
+  // for (int i = 0; i < num; i++)
+  // {
+  //   int *tmp = malloc(sizeof(int));
+  //   *tmp = cache[i];
+  //   printf("DEL %d\n", *tmp);
+  //   b_tree_del_node(t, tmp);
+  //   printf("==============================1\n");
+  //   b_tree_bfs_traversal_subtree(t->root, traverse);
+  //   printf("==============================2\n\n\n");
+  // }
 }
 
 int main(int argc, char **argv)

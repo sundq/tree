@@ -33,6 +33,7 @@ struct b_tree_node
     b_tree_node_t *parent; //
     b_tree_node_t **child;
     intptr_t *key; //关键字数组
+    int child_index;//如果是有父节点，表示是第几个孩子
     int leaf;
 };
 
