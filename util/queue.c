@@ -15,8 +15,8 @@ int queue_push(queue_t *q, void *data)
   q->num++;
   if (q->size == q->num) //resize queue
   {
-    printf("resize...\n");
-    void *new_buf = allocate_memory(q->size * 2);
+    //printf("\nresize...\n");
+    void *new_buf = allocate_memory(q->size * 2 * sizeof(void *));
     memcpy(new_buf, q->buf, (q->size) * sizeof(void *));
     q->size *= 2;
     release_memory(q->buf);

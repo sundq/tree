@@ -95,19 +95,20 @@ void rb_tree_test()
 
 void b_tree_test()
 {
-  int cache[1024] = {0};
+  int cache[3000] = {0};
   // int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
   //               457, 913, 936, 431, 381};
   //int test[] = {22, 95, 60, 88, 1, 93, 85, 73, 63, 50, 47, 40, 44, 44};
-  int test[] = {271, 565, 206, 483, 144, 46, 259, 255, 303};
-  int num = sizeof(test) / sizeof(int);
+  //int test[] = {271, 565, 206, 483, 144, 46, 259, 255, 303};
+  int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
+  int num = 300;//sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
   b_tree_t *t = b_tree_init(4, compare);
   char xx[100] = {};
   for (int i = 0; i < num; i++)
   {
     int *tmp = malloc(sizeof(int));
-    *tmp = test[i];//rand() % (num * 20);
+    *tmp = i; //rand() % (num * 20);
     printf("add %d\n", *tmp);
     cache[i] = *tmp;
     //sprintf(xx, "echo '%d,' >> ./xx", *tmp);

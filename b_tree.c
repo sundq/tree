@@ -44,7 +44,8 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
    return iret;
 }
 
-static inline int find_child_ptr(b_tree_node_t *node)
+//查找结点是第几个孩子
+static inline int find_child_index(b_tree_node_t *node)
 {
    b_tree_node_t *parent = node->parent;
    for (int i = 0; parent && i <= parent->key_num; i++)
@@ -168,6 +169,7 @@ int b_tree_add_node(b_tree_t *btree, void *key)
    b_tree_node_t *current_node = insert_node;
    while (current_node->key_num == btree->order) //分裂
    {
+      int child_index = find_child_index(current_node);
       intptr_t middle_key = current_node->key[current_node->key_num / 2];
       b_tree_node_t *parent = current_node->parent;
       b_tree_node_t *new = create_b_tree_node(btree);
@@ -185,7 +187,6 @@ int b_tree_add_node(b_tree_t *btree, void *key)
          if (new->child[m] != NULL)
          {
             new->child[m]->parent = new;
-            new->child[m]->child_index = m;
             new->leaf = 0;
          }
          current_node->child[i] = NULL;
@@ -196,18 +197,16 @@ int b_tree_add_node(b_tree_t *btree, void *key)
          parent = create_b_tree_node(btree);
          parent->leaf = 0;
          btree->root = parent;
-         current_node->child_index = 0;
       }
       new->parent = parent;
       current_node->parent = parent;
-      insert_key_to_tree_node(btree, parent, (void *)middle_key, current_node->child_index);
-      for (int i = btree->order; i > current_node->child_index + 1; i--)
+      insert_key_to_tree_node(btree, parent, (void *)middle_key, child_index);
+      for (int i = parent->key_num + 1; i > child_index + 1; i--)
       {
          parent->child[i] = parent->child[i - 1];
       }
-      parent->child[current_node->child_index] = current_node;
-      parent->child[current_node->child_index + 1] = new;
-      new->child_index = current_node->child_index + 1;
+      parent->child[child_index] = current_node;
+      parent->child[child_index + 1] = new;
       current_node = parent;
    }
    return 0;
@@ -306,7 +305,7 @@ node_del:
               current_node->key_num < (ceil(btree->order, 2) - 1) &&
               current_node->parent != NULL))
       {
-         int index = find_child_ptr(current_node);
+         int index = find_child_index(current_node);
          b_tree_node_t *l_sibling = index > 0 ? current_node->parent->child[index - 1] : NULL;
          b_tree_node_t *r_sibling = index < btree->order - 1 ? current_node->parent->child[index + 1] : NULL;
 
