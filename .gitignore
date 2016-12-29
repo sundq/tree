@@ -1,6 +1,7 @@
 nbproject/*
 dist/Debug
+obj/*
+bin/*
 build/Debug
 build/Release
 .dep.inc
-Makefile

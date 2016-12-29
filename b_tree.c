@@ -232,7 +232,7 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
    }
 
    merge_node->key[merge_node->key_num++] = parent->key[merge_child_index];         //移动父结点的关键字
-   for (int i = merge_node->key_num, m = 0; m < merged_node->key_num + 1; i++, m++) //合并孩子指针
+   for (int i = merge_node->key_num, m = 0; m <= merged_node->key_num; i++, m++) //合并孩子指针
    {
       merge_node->child[i] = merged_node->child[m];
       if (merge_node->child[i] != NULL)

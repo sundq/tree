@@ -120,16 +120,16 @@ void b_tree_test()
   }
   //system("echo '\n' >> ./xx");
 
-  // for (int i = 0; i < num; i++)
-  // {
-  //   int *tmp = malloc(sizeof(int));
-  //   *tmp = cache[i];
-  //   printf("DEL %d\n", *tmp);
-  //   b_tree_del_node(t, tmp);
-  //   printf("==============================1\n");
-  //   b_tree_bfs_traversal_subtree(t->root, traverse);
-  //   printf("==============================2\n\n\n");
-  // }
+  for (int i = 0; i < num; i++)
+  {
+    int *tmp = malloc(sizeof(int));
+    *tmp = cache[i];
+    printf("DEL %d\n", *tmp);
+    b_tree_del_node(t, tmp);
+    printf("==============================1\n");
+    b_tree_bfs_traversal_subtree(t->root, traverse);
+    printf("==============================2\n\n\n");
+  }
 }
 
 int main(int argc, char **argv)
