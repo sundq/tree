@@ -21,7 +21,8 @@ extern "C"
 #include "./util/queue.h"
 
 
-#define ceil(m, n) (m/n + m%n)    
+#define ceil(m, n) (m/n + m%n)
+#define is_leaf_node(node) (node->child[0] == NULL)    
     
 typedef struct b_tree_node b_tree_node_t;
 typedef struct b_tree b_tree_t;

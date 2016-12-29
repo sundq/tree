@@ -166,32 +166,32 @@ int b_tree_add_node(b_tree_t *btree, void *key)
    {
       insert_key_to_tree_node(btree, insert_node, key, found_key_index);
    }
-   b_tree_node_t *current_node = insert_node;
-   while (current_node->key_num == btree->order) //分裂
+   b_tree_node_t *cur_node = insert_node;
+   while (cur_node->key_num == btree->order) //分裂
    {
-      int child_index = find_child_index(current_node);
-      intptr_t middle_key = current_node->key[current_node->key_num / 2];
-      b_tree_node_t *parent = current_node->parent;
+      int child_index = find_child_index(cur_node);
+      intptr_t middle_key = cur_node->key[cur_node->key_num / 2];
+      b_tree_node_t *parent = cur_node->parent;
       b_tree_node_t *new = create_b_tree_node(btree);
-      int i = current_node->key_num / 2 + 1;
+      int i = cur_node->key_num / 2 + 1;
       int m = 0;
-      for (i = current_node->key_num / 2 + 1, m = 0; i <= current_node->key_num; i++, m++)
+      for (i = cur_node->key_num / 2 + 1, m = 0; i <= cur_node->key_num; i++, m++)
       {
-         if (i < current_node->key_num)
+         if (i < cur_node->key_num)
          {
-            new->key[m] = current_node->key[i];
+            new->key[m] = cur_node->key[i];
             new->key_num++;
-            current_node->key[i] = 0;
+            cur_node->key[i] = 0;
          }
-         new->child[m] = current_node->child[i];
+         new->child[m] = cur_node->child[i];
          if (new->child[m] != NULL)
          {
             new->child[m]->parent = new;
             new->leaf = 0;
          }
-         current_node->child[i] = NULL;
+         cur_node->child[i] = NULL;
       }
-      current_node->key_num = current_node->key_num / 2;
+      cur_node->key_num = cur_node->key_num / 2;
       if (parent == NULL)
       {
          parent = create_b_tree_node(btree);
@@ -199,34 +199,34 @@ int b_tree_add_node(b_tree_t *btree, void *key)
          btree->root = parent;
       }
       new->parent = parent;
-      current_node->parent = parent;
+      cur_node->parent = parent;
       insert_key_to_tree_node(btree, parent, (void *)middle_key, child_index);
       for (int i = parent->key_num + 1; i > child_index + 1; i--)
       {
          parent->child[i] = parent->child[i - 1];
       }
-      parent->child[child_index] = current_node;
+      parent->child[child_index] = cur_node;
       parent->child[child_index + 1] = new;
-      current_node = parent;
+      cur_node = parent;
    }
    return 0;
 }
 
-static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *current_node, int child_index, b_tree_node_t *l_sibling, b_tree_node_t *r_sibling)
+static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node, int child_index, b_tree_node_t *l_sibling, b_tree_node_t *r_sibling)
 {
-   b_tree_node_t *parent = current_node->parent;
+   b_tree_node_t *parent = cur_node->parent;
    b_tree_node_t *merge_node = NULL;
    b_tree_node_t *merged_node = NULL; //被合并的结点
    int merge_child_index = child_index;
    if (l_sibling != NULL) //左兄弟存在
    {
       merge_node = l_sibling;
-      merged_node = current_node;
+      merged_node = cur_node;
       merge_child_index -= 1;
    }
    else
    {
-      merge_node = current_node;
+      merge_node = cur_node;
       merged_node = r_sibling;
       merge_child_index = child_index;
    }
@@ -256,109 +256,85 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *current_
 
 int b_tree_del_node(b_tree_t *btree, void *key)
 {
-   int index_node = 0;
-   b_tree_node_t *current_node = btree->root;
-   while (current_node != NULL)
+   int key_index = 0;
+   b_tree_node_t *cur_node = NULL;
+   int found_key_index = 0;
+   int iret = find_key(btree, key, &cur_node, &key_index);
+   if (cur_node != NULL)
    {
-      while (current_node != NULL && index_node < current_node->key_num)
+      if (!is_leaf_node(cur_node)) //非叶子结点
       {
-         int iret = btree->compare(key, (void *)current_node->key[index_node]);
-         if (iret < 0)
-         {
-            current_node = current_node->child[index_node];
-            index_node = 0;
-         }
-         else if (iret == 0)
-         {
-            goto node_del; //find
-         }
-         else
-         {
-            index_node++;
-         }
-      }
-      index_node = 0;
-      if (current_node == NULL)
-      {
-         break;
-      }
-      current_node = current_node->child[current_node->key_num];
-   }
-
-node_del:
-   if (current_node != NULL)
-   {
-      if (!current_node->leaf) //非叶子结点
-      {
-         b_tree_node_t *successor_node = current_node->child[index_node + 1];
+         b_tree_node_t *successor_node = cur_node->child[key_index + 1];
          while (successor_node->child[0] != NULL) //找后继结点
          {
             successor_node = successor_node->child[0];
          }
-         current_node->key[index_node] = successor_node->key[0];
-         current_node = successor_node;
-         index_node = 0;
+         cur_node->key[key_index] = successor_node->key[0];
+         cur_node = successor_node;
+         key_index = 0;
       }
-      del_key_from_tree_node(btree, current_node, index_node);
+      del_key_from_tree_node(btree, cur_node, key_index);
 
-      while ((current_node != NULL &&
-              current_node->key_num < (ceil(btree->order, 2) - 1) &&
-              current_node->parent != NULL))
+      while ((cur_node != NULL &&
+              cur_node->key_num < (ceil(btree->order, 2) - 1) &&
+              cur_node->parent != NULL))
       {
-         int index = find_child_index(current_node);
-         b_tree_node_t *l_sibling = index > 0 ? current_node->parent->child[index - 1] : NULL;
-         b_tree_node_t *r_sibling = index < btree->order - 1 ? current_node->parent->child[index + 1] : NULL;
+         int child_index = find_child_index(cur_node);
+         b_tree_node_t *l_sibling = child_index > 0 ? cur_node->parent->child[child_index - 1] : NULL;
+         b_tree_node_t *r_sibling = child_index < btree->order - 1 ? cur_node->parent->child[child_index + 1] : NULL;
 
          //借结点需要关键字和孩子结点一起借!!!
-         if (l_sibling != NULL && l_sibling->key_num > btree->order / 2) //左兄弟丰满
+         if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2)) //左兄弟丰满
          {
-            //insert_key_to_tree_node(btree, current_node, (void *)current_node->parent->key[index - 1]); //父结点的关键字转移到当前结点
-            for (int i = current_node->key_num + 1; i > 0; i--) //先借孩子结点
+            for (int i = cur_node->key_num + 1; i > 0; i--) //先借孩子结点
             {
-               current_node->child[i] = current_node->child[i - 1];
+               cur_node->child[i] = cur_node->child[i - 1];
             }
-            current_node->child[0] = l_sibling->child[l_sibling->key_num];
-            if (current_node->child[0] != NULL)
+            cur_node->child[0] = l_sibling->child[l_sibling->key_num];
+            if (cur_node->child[0] != NULL)
             {
-               current_node->child[0]->parent = current_node;
+               cur_node->child[0]->parent = cur_node;
             }
-
-            del_key_from_tree_node(btree, current_node->parent, index - 1); //删除父结点的关键字
-            //insert_key_to_tree_node(btree, current_node->parent, (void *)l_sibling->key[l_sibling->key_num - 1]);
-            del_key_from_tree_node(btree, l_sibling, l_sibling->key_num - 1);
+            insert_key_to_tree_node(btree, cur_node, (void *)cur_node->parent->key[child_index - 1], 0);
+            del_key_from_tree_node(btree, cur_node->parent, child_index - 1); //删除父结点的关键字
+            insert_key_to_tree_node(btree, cur_node->parent, (void *)l_sibling->key[l_sibling->key_num - 1], child_index - 1);
+            l_sibling->key[l_sibling->key_num - 1] = 0;
+            l_sibling->key_num--;
          }
-         else if (r_sibling != NULL && r_sibling->key_num > btree->order / 2) //右兄弟丰满
+         else if (r_sibling != NULL && r_sibling->key_num >= ceil(btree->order, 2)) //右兄弟丰满
          {
-            //insert_key_to_tree_node(btree, current_node, (void *)current_node->parent->key[index]); //父结点的关键字转移到当前结点
-            current_node->child[current_node->key_num] = r_sibling->child[0];
-            if (current_node->child[current_node->key_num] != NULL)
+            cur_node->key[cur_node->key_num] = cur_node->parent->key[child_index];
+            cur_node->key_num++;
+
+            cur_node->child[cur_node->key_num] = r_sibling->child[0];
+            if (cur_node->child[cur_node->key_num] != NULL)
             {
-               current_node->child[current_node->key_num]->parent = current_node;
+               cur_node->child[cur_node->key_num]->parent = cur_node;
             }
 
-            for (int i = 0; i < r_sibling->key_num; i++) //先借孩子结点
+            for (int i = 0; i < r_sibling->key_num; i++)
             {
                r_sibling->child[i] = r_sibling->child[i + 1];
             }
             r_sibling->child[r_sibling->key_num] = NULL;
 
-            del_key_from_tree_node(btree, current_node->parent, index); //删除父结点的关键字
-            //insert_key_to_tree_node(btree, current_node->parent, (void *)r_sibling->key[0]);
+            del_key_from_tree_node(btree, cur_node->parent, child_index); //删除父结点的关键字
+            insert_key_to_tree_node(btree, cur_node->parent, (void *)r_sibling->key[0], child_index);
             del_key_from_tree_node(btree, r_sibling, 0);
          }
          else //合并
          {
-            b_tree_node_t *merged_node = merge_node(btree, current_node, index, l_sibling, r_sibling);
+            b_tree_node_t *merged_node = merge_node(btree, cur_node, child_index, l_sibling, r_sibling);
             if (merged_node->parent != NULL && merged_node->parent->key_num == 0)
             {
                btree->root = merged_node;
                release_b_tree_node(merged_node->parent); //树的高度降低
                merged_node->parent = NULL;
-               current_node = NULL;
+               cur_node = NULL;
             }
             else
             {
-               current_node = merged_node->parent;
+               cur_node = merged_node->parent;
             }
          }
       }
