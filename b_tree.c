@@ -34,6 +34,11 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
       iret = 1;
       while (iret > 0 && index < node->key_num) //break if iret <= 0, means find the key or the insert node
       {
+         if ((void *)node->key[index] == NULL)
+         {
+            printf("%d %lu\n", index, node->key_num); 
+            exit(1);    
+         }
          iret = btree->compare(key, (void *)node->key[index]);
          index += (iret > 0 ? 1 : 0);
       }
@@ -249,7 +254,6 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
    }
    parent->child[parent->key_num] = NULL;
    del_key_from_tree_node(btree, parent, merge_child_index);
-
    release_b_tree_node(merged_node);
    return merge_node;
 }
@@ -260,7 +264,7 @@ int b_tree_del_node(b_tree_t *btree, void *key)
    b_tree_node_t *cur_node = NULL;
    int found_key_index = 0;
    int iret = find_key(btree, key, &cur_node, &key_index);
-   if (cur_node != NULL)
+   if (iret == 0)
    {
       if (!is_leaf_node(cur_node)) //非叶子结点
       {
@@ -281,7 +285,7 @@ int b_tree_del_node(b_tree_t *btree, void *key)
       {
          int child_index = find_child_index(cur_node);
          b_tree_node_t *l_sibling = child_index > 0 ? cur_node->parent->child[child_index - 1] : NULL;
-         b_tree_node_t *r_sibling = child_index < btree->order - 1 ? cur_node->parent->child[child_index + 1] : NULL;
+         b_tree_node_t *r_sibling = child_index < cur_node->parent->key_num ? cur_node->parent->child[child_index + 1] : NULL;
 
          //借结点需要关键字和孩子结点一起借!!!
          if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2)) //左兄弟丰满
@@ -325,7 +329,7 @@ int b_tree_del_node(b_tree_t *btree, void *key)
          else //合并
          {
             b_tree_node_t *merged_node = merge_node(btree, cur_node, child_index, l_sibling, r_sibling);
-            if (merged_node->parent != NULL && merged_node->parent->key_num == 0)
+            if (merged_node->parent != NULL && merged_node->parent->parent == NULL && merged_node->parent->key_num == 0)
             {
                btree->root = merged_node;
                release_b_tree_node(merged_node->parent); //树的高度降低

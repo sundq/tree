@@ -101,7 +101,7 @@ void b_tree_test()
   //int test[] = {22, 95, 60, 88, 1, 93, 85, 73, 63, 50, 47, 40, 44, 44};
   //int test[] = {271, 565, 206, 483, 144, 46, 259, 255, 303};
   int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
-  int num = 300;//sizeof(test) / sizeof(int);
+  int num = 2000; //sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
   b_tree_t *t = b_tree_init(4, compare);
   char xx[100] = {};
@@ -114,22 +114,26 @@ void b_tree_test()
     //sprintf(xx, "echo '%d,' >> ./xx", *tmp);
     //system(xx);
     b_tree_add_node(t, tmp);
-    printf("*****************************1\n");
-    b_tree_bfs_traversal_subtree(t->root, traverse);
-    printf("*****************************2\n\n\n");
+    //printf("*****************************1\n");
+    //b_tree_bfs_traversal_subtree(t->root, traverse);
+    //printf("*****************************2\n\n\n");
   }
   //system("echo '\n' >> ./xx");
 
+  //for (int i = num - 1; i >= 0; i--)
+  //int cache[] = {21, 18, 9, 12, 22, 20, 16, 29, 24, 25, 14, 18, 27, 13, 26, 15, 9, 2, 13, 3, 1};
   for (int i = 0; i < num; i++)
   {
     int *tmp = malloc(sizeof(int));
-    *tmp = cache[i];
+    *tmp = cache[rand() % num];
+    //*tmp = cache[i];
     printf("DEL %d\n", *tmp);
     b_tree_del_node(t, tmp);
     printf("==============================1\n");
-    b_tree_bfs_traversal_subtree(t->root, traverse);
+    //b_tree_bfs_traversal_subtree(t->root, traverse);
     printf("==============================2\n\n\n");
   }
+  b_tree_bfs_traversal_subtree(t->root, traverse);
 }
 
 int main(int argc, char **argv)
