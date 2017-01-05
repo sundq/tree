@@ -95,7 +95,7 @@ void rb_tree_test()
 
 void b_tree_test()
 {
-  #define size_buff 1024 * 1024
+  #define size_buff 10//1024 * 1024
   int cache[size_buff] = {0};
   
   // int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
@@ -112,7 +112,7 @@ void b_tree_test()
   //int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
   int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
-  b_tree_t *t = b_tree_init(4, compare);
+  b_tree_t *t = b_tree_init(5, compare);
   char xx[100] = {};
   for (int i = 0; i < num; i++)
   {

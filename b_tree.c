@@ -33,6 +33,31 @@ static inline b_tree_node_t *release_b_tree_node(b_tree_node_t *node)
    return 0;
 }
 
+static inline int binary_search(key_t array, int len, void *key, int *index, compare_func_t compare)
+{
+   int low = 0;
+   int high = 0;
+   int mid = 0;
+   low = 0;
+   high = len - 1;
+   int iret = 1;
+   while (low <= high && iret != 0)
+   {
+      mid = (low + high) / 2;
+      iret = compare(key, array[mid]);
+      if (iret > 0)
+      {
+         low = mid + 1;
+      }
+      else if (iret < 0)
+      {
+         high = mid - 1;
+      }
+   }
+   *index = mid;
+   return iret;
+}
+
 static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_node, int *key_index, compare_func_t compare)
 {
    b_tree_node_t *node = btree->root;
@@ -44,15 +69,9 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
    while (node != NULL && iret != 0)
    {
       index = 0;
-      iret = 1;
-      while (iret > 0 && index < node->key_num) //break if iret <= 0, means find the key or the insert node
-      {
-         iret = compare(key, (void *)node->key[index]);
-         index += (iret > 0 ? 1 : 0);
-      }
-      *key_index = index;
+      iret = binary_search(node->key, node->key_num, key, key_index, compare);
       *found_node = node;
-      node = node->data[index];
+      node = iret < 0 ? node->data[*key_index] : node->data[*key_index + 1];
    }
    return iret;
 }
@@ -242,9 +261,9 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
       merged_node = r_sibling;
       merge_child_index = child_index;
    }
- 
-   assign_node_key(merge_node->key[merge_node->key_num++], parent->key[merge_child_index]);//移动父结点的关键字
-   for (int i = merge_node->key_num, m = 0; m <= merged_node->key_num; i++, m++) //合并孩子指针
+
+   assign_node_key(merge_node->key[merge_node->key_num++], parent->key[merge_child_index]); //移动父结点的关键字
+   for (int i = merge_node->key_num, m = 0; m <= merged_node->key_num; i++, m++)            //合并孩子指针
    {
       merge_node->data[i] = merged_node->data[m];
       if (merge_node->data[i] != NULL)
