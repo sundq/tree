@@ -95,21 +95,28 @@ void rb_tree_test()
 
 void b_tree_test()
 {
-  #define size_buff 20//1024 * 1024
+  #define size_buff 40//1024 * 1024
   int cache[size_buff] = {0};
   
   // int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
   //               457, 913, 936, 431, 381};
   //int test[] = {22, 95, 60, 88, 1, 93, 85, 73, 63, 50, 47, 40, 44, 44};
   //int test[] = {271, 565, 206, 483, 144, 46, 259, 255, 303};
-  int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
-  int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
+
+  int test[] = {
+    27,
+8, 17,35,
+2, 6,12 ,14,20 ,23,29, 33,38,
+0,3,7,11,13,16,18, 19,21 ,22,24, 25,28,31,34,37,39
+  };
+  //int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
+  int num = sizeof(test) / sizeof(int); //sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
   b_tree_t *t = b_tree_init(4, compare);
   char xx[100] = {};
   for (int i = 0; i < num; i++)
   {
-    int tmp = i; //rand() % (num * 20);
+    int tmp = test[i]; //rand() % (num * 20);
     printf("add %d\n", tmp);
     cache[i] = tmp;
     //sprintf(xx, "echo '%d,' >> ./xx", *tmp);
@@ -123,6 +130,7 @@ void b_tree_test()
 
   //for (int i = num - 1; i >= 0; i--)
   //int cache[] = {21, 18, 9, 12, 22, 20, 16, 29, 24, 25, 14, 18, 27, 13, 26, 15, 9, 2, 13, 3, 1};
+  b_tree_del_node_int(t, 35);
   for (int i = 0; i < num; i++)
   {
     int tmp = cache[rand() % num];

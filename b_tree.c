@@ -89,7 +89,7 @@ static inline int del_key_from_tree_node(b_tree_t *btree, b_tree_node_t *node, i
    {
       assign_node_key(node->key[i], node->key[i + 1]);
    }
-   memset(node->key[node->key_num], 0, sizeof(*node->key));
+   clear_node_key(node->key[node->key_num]);
    node->key_num--;
    return 0;
 }
@@ -309,7 +309,7 @@ int b_tree_del_node_int(b_tree_t *btree, int key)
             insert_key_to_tree_node(btree, cur_node, (void *)cur_node->parent->key[child_index - 1], 0);
             del_key_from_tree_node(btree, cur_node->parent, child_index - 1); //删除父结点的关键字
             insert_key_to_tree_node(btree, cur_node->parent, (void *)l_sibling->key[l_sibling->key_num - 1], child_index - 1);
-            memset(l_sibling->key[l_sibling->key_num - 1], 0, sizeof(*l_sibling->key));
+            clear_node_key(l_sibling->key[l_sibling->key_num - 1]);
             l_sibling->key_num--;
          }
          else if (r_sibling != NULL && r_sibling->key_num >= ceil(btree->order, 2)) //右兄弟丰满
