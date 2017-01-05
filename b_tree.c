@@ -304,7 +304,7 @@ int b_tree_del_node_int(b_tree_t *btree, int key)
             cur_node->data[0] = l_sibling->data[l_sibling->key_num];
             if (cur_node->data[0] != NULL)
             {
-               set_node_parent(cur_node->data, cur_node);
+               set_node_parent(cur_node->data[0], cur_node);
             }
             insert_key_to_tree_node(btree, cur_node, (void *)cur_node->parent->key[child_index - 1], 0);
             del_key_from_tree_node(btree, cur_node->parent, child_index - 1); //删除父结点的关键字

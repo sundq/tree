@@ -95,7 +95,7 @@ void rb_tree_test()
 
 void b_tree_test()
 {
-  #define size_buff 40//1024 * 1024
+  #define size_buff 1024 * 1024
   int cache[size_buff] = {0};
   
   // int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
@@ -110,36 +110,35 @@ void b_tree_test()
 0,3,7,11,13,16,18, 19,21 ,22,24, 25,28,31,34,37,39
   };
   //int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
-  int num = sizeof(test) / sizeof(int); //sizeof(test) / sizeof(int);
+  int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
   b_tree_t *t = b_tree_init(4, compare);
   char xx[100] = {};
   for (int i = 0; i < num; i++)
   {
-    int tmp = test[i]; //rand() % (num * 20);
+    int tmp = rand() % (num * 20);
     printf("add %d\n", tmp);
     cache[i] = tmp;
     //sprintf(xx, "echo '%d,' >> ./xx", *tmp);
     //system(xx);
     b_tree_add_node_int(t, tmp);
-    printf("*****************************1\n");
-    b_tree_bfs_traversal_subtree(t->root, traverse);
-    printf("*****************************2\n\n\n");
+    // printf("*****************************1\n");
+    // b_tree_bfs_traversal_subtree(t->root, traverse);
+    // printf("*****************************2\n\n\n");
   }
   //system("echo '\n' >> ./xx");
 
   //for (int i = num - 1; i >= 0; i--)
   //int cache[] = {21, 18, 9, 12, 22, 20, 16, 29, 24, 25, 14, 18, 27, 13, 26, 15, 9, 2, 13, 3, 1};
-  b_tree_del_node_int(t, 35);
   for (int i = 0; i < num; i++)
   {
     int tmp = cache[rand() % num];
     //*tmp = cache[i];
     printf("DEL %d\n", tmp);
     b_tree_del_node_int(t, tmp);
-    printf("==============================1\n");
-    b_tree_bfs_traversal_subtree(t->root, traverse);
-    printf("==============================2\n\n\n");
+    // printf("==============================1\n");
+    // b_tree_bfs_traversal_subtree(t->root, traverse);
+    // printf("==============================2\n\n\n");
   }
   b_tree_bfs_traversal_subtree(t->root, traverse);
 }
