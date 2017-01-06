@@ -17,8 +17,8 @@ static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
 {
    b_tree_node_t *node = (b_tree_node_t *)allocate_memory(sizeof(b_tree_node_t));
    node->parent = NULL;
-   node->data = (void **)allocate_memory(sizeof(*node->data) * (root->order + 2));
-   node->key = allocate_memory(key_size * (root->order + 1));
+   node->data = (void **)allocate_memory(sizeof(*node->data) * (root->order + 1));
+   node->key = allocate_memory(key_size * root->order);
    node->key_num = 0;
    node->leaf = 1;
    node->child_index = -1;
@@ -210,7 +210,7 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
       key_t middle_key = cur_node->key + cur_node->key_num / 2;
       b_tree_node_t *parent = cur_node->parent;
       b_tree_node_t *new = create_b_tree_node(btree);
-      for (int i = cur_node->key_num / 2 + 1, m = 0; i <= cur_node->key_num; i++, m++) //这里<=是为了统一处理，key的缓存和孩子的缓存是一样大
+      for (int i = cur_node->key_num / 2 + 1, m = 0; i <= cur_node->key_num; i++, m++)
       {
          if (i < cur_node->key_num)
          {
@@ -219,7 +219,7 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
             clear_node_key(cur_node->key[i]);
          }
          new->data[m] = cur_node->data[i];
-         if (new->data[m] != NULL)
+         if (new->data[m] != NULL) //todo check the node is leaf node
          {
             set_node_parent(new->data[m], new);
          }
@@ -235,7 +235,7 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
       set_node_parent(cur_node, parent);
 
       insert_key_to_tree_node(btree, parent, (void *)middle_key, child_index);
-      for (int i = parent->key_num + 1; i > child_index + 1; i--)
+      for (int i = parent->key_num; i > child_index + 1; i--)
       {
          parent->data[i] = parent->data[i - 1];
       }
