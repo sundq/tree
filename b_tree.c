@@ -17,8 +17,8 @@ static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
 {
    b_tree_node_t *node = (b_tree_node_t *)allocate_memory(sizeof(b_tree_node_t));
    node->parent = NULL;
-   node->data = (void **)allocate_memory(sizeof(*node->data) * (root->order + 1));
-   node->key = allocate_memory(key_size * root->order);
+   node->data = (void **)allocate_memory(sizeof(*node->data) * (root->order + 2));
+   node->key = allocate_memory(key_size * (root->order + 1));
    node->key_num = 0;
    node->leaf = 1;
    node->child_index = -1;
@@ -52,7 +52,7 @@ static inline int binary_search(key_t array, int len, void *key, int *index, com
          high = mid - 1;
       }
    }
-   *index = iret > 0 ? mid + 1: mid;
+   *index = iret > 0 ? mid + 1 : mid;
    return iret;
 }
 
@@ -78,6 +78,7 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
          node = NULL;
       }
    }
+   printf("key_index:%d\n", *key_index);
    return iret;
 }
 
@@ -209,9 +210,7 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
       key_t middle_key = cur_node->key + cur_node->key_num / 2;
       b_tree_node_t *parent = cur_node->parent;
       b_tree_node_t *new = create_b_tree_node(btree);
-      int i = cur_node->key_num / 2 + 1;
-      int m = 0;
-      for (i = cur_node->key_num / 2 + 1, m = 0; i <= cur_node->key_num; i++, m++)
+      for (int i = cur_node->key_num / 2 + 1, m = 0; i <= cur_node->key_num; i++, m++) //这里<=是为了统一处理，key的缓存和孩子的缓存是一样大
       {
          if (i < cur_node->key_num)
          {
