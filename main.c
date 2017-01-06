@@ -95,7 +95,7 @@ void rb_tree_test()
 
 void b_tree_test()
 {
-  #define size_buff 10//1024 * 1024
+  #define size_buff 1024 * 1024
   int cache[size_buff] = {0};
   
   // int test[] = {1002, 651, 936, 697, 851, 475, 228, 279, 697, 584, 799, 308, 498, 930, 436, 175, 633,
@@ -103,12 +103,6 @@ void b_tree_test()
   //int test[] = {22, 95, 60, 88, 1, 93, 85, 73, 63, 50, 47, 40, 44, 44};
   //int test[] = {271, 565, 206, 483, 144, 46, 259, 255, 303};
 
-  int test[] = {
-    27,
-8, 17,35,
-2, 6,12 ,14,20 ,23,29, 33,38,
-0,3,7,11,13,16,18, 19,21 ,22,24, 25,28,31,34,37,39
-  };
   //int test[] = {583, 384, 150, 240, 180, 491, 453, 35, 557};
   int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
   srand((unsigned)time(NULL));
@@ -122,7 +116,7 @@ void b_tree_test()
     //sprintf(xx, "echo '%d,' >> ./xx", *tmp);
     //system(xx);
     b_tree_add_node_int(t, tmp);
-    // printf("*****************************1\n");
+    // printf("\n*****************************1\n");
     // b_tree_bfs_traversal_subtree(t->root, traverse);
     // printf("*****************************2\n\n\n");
   }

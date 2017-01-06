@@ -194,7 +194,7 @@ void compute_edge_lengths(asciinode *node)
     {
       for (i = 0; i < node->lchild->height && i < MAX_HEIGHT; i++)
       {
-	rprofile[i] = -INFINITY;
+        rprofile[i] = -INFINITY;
       }
       compute_rprofile(node->lchild, 0, 0);
       hmin = node->lchild->height;
@@ -207,7 +207,7 @@ void compute_edge_lengths(asciinode *node)
     {
       for (i = 0; i < node->rchild->height && i < MAX_HEIGHT; i++)
       {
-	lprofile[i] = INFINITY;
+        lprofile[i] = INFINITY;
       }
       compute_lprofile(node->rchild, 0, 0);
       hmin = MIN(node->rchild->height, hmin);
@@ -225,8 +225,8 @@ void compute_edge_lengths(asciinode *node)
     //If the node has two children of height 1, then we allow the
     //two leaves to be within 1, instead of 2
     if (((node->lchild != NULL && node->lchild->height == 1) ||
-	 (node->rchild != NULL && node->rchild->height == 1)) &&
-	delta > 4)
+         (node->rchild != NULL && node->rchild->height == 1)) &&
+        delta > 4)
     {
       delta--;
     }
@@ -272,7 +272,7 @@ void print_level(asciinode *node, int x, int level)
     {
       for (i = 0; i < (x - print_next - (level)); i++)
       {
-	printf(" ");
+        printf(" ");
       }
       print_next += i;
       printf("/");
@@ -282,7 +282,7 @@ void print_level(asciinode *node, int x, int level)
     {
       for (i = 0; i < (x - print_next + (level)); i++)
       {
-	printf(" ");
+        printf(" ");
       }
       print_next += i;
       printf("\\");
@@ -292,11 +292,11 @@ void print_level(asciinode *node, int x, int level)
   else
   {
     print_level(node->lchild,
-		x - node->edge_length - 1,
-		level - node->edge_length - 1);
+                x - node->edge_length - 1,
+                level - node->edge_length - 1);
     print_level(node->rchild,
-		x + node->edge_length + 1,
-		level - node->edge_length - 1);
+                x + node->edge_length + 1,
+                level - node->edge_length - 1);
   }
 }
 

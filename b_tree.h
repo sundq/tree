@@ -21,8 +21,16 @@ extern "C" {
 
 #define ceil(m, n) (m / n + m % n)
 #define key_size 32
-#define is_leaf_node(node) (((b_tree_node_t *)(node))->data[0] == NULL)
-#define set_node_parent(node, p) (((b_tree_node_t *)(node))->parent = p)
+#define is_leaf_node(node) (((b_tree_node_t *)(node))->leaf == 1)
+#define set_node_parent(node, p)                           \
+    do                                                     \
+    {                                                      \
+        b_tree_node_t *macro_node = (b_tree_node_t *)node; \
+        b_tree_node_t *macro_p = (b_tree_node_t *)p;       \
+        macro_node->parent = p;                            \
+        macro_p->leaf = 0;                                 \
+    } while (0)
+
 #define assign_node_key(dst, src) memcpy(dst, src, key_size)
 #define clear_node_key(buff) memset(buff, 0, key_size)
 

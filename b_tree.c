@@ -36,11 +36,9 @@ static inline b_tree_node_t *release_b_tree_node(b_tree_node_t *node)
 static inline int binary_search(key_t array, int len, void *key, int *index, compare_func_t compare)
 {
    int low = 0;
-   int high = 0;
+   int high = len - 1;
    int mid = 0;
-   low = 0;
-   high = len - 1;
-   int iret = 1;
+   int iret = -1;
    while (low <= high && iret != 0)
    {
       mid = (low + high) / 2;
@@ -54,7 +52,7 @@ static inline int binary_search(key_t array, int len, void *key, int *index, com
          high = mid - 1;
       }
    }
-   *index = mid;
+   *index = iret > 0 ? mid + 1: mid;
    return iret;
 }
 
@@ -71,7 +69,14 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
       index = 0;
       iret = binary_search(node->key, node->key_num, key, key_index, compare);
       *found_node = node;
-      node = iret < 0 ? node->data[*key_index] : node->data[*key_index + 1];
+      if (!is_leaf_node(node))
+      {
+         node = node->data[*key_index];
+      }
+      else
+      {
+         node = NULL;
+      }
    }
    return iret;
 }
@@ -217,8 +222,7 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
          new->data[m] = cur_node->data[i];
          if (new->data[m] != NULL)
          {
-            ((b_tree_node_t *)(new->data[m]))->parent = new;
-            new->leaf = 0;
+            set_node_parent(new->data[m], new);
          }
          cur_node->data[i] = NULL;
       }
@@ -226,11 +230,11 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
       if (parent == NULL)
       {
          parent = create_b_tree_node(btree);
-         parent->leaf = 0;
          btree->root = parent;
       }
-      new->parent = parent;
-      cur_node->parent = parent;
+      set_node_parent(new, parent);
+      set_node_parent(cur_node, parent);
+
       insert_key_to_tree_node(btree, parent, (void *)middle_key, child_index);
       for (int i = parent->key_num + 1; i > child_index + 1; i--)
       {
