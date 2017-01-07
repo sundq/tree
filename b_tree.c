@@ -21,7 +21,7 @@ static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
    node->key = allocate_memory(key_size * root->order);
    node->key_num = 0;
    node->leaf = 1;
-   node->child_index = -1;
+   node->child_index = 0;
    return node;
 }
 
@@ -72,6 +72,7 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
       if (!is_leaf_node(node))
       {
          node = node->data[*key_index];
+//         set_node_child_index(node->data[*key_index], *key_index);
       }
       else
       {
@@ -85,15 +86,16 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
 //查找结点是第几个孩子
 static inline int find_child_index(b_tree_node_t *node)
 {
-   b_tree_node_t *parent = node->parent;
-   for (int i = 0; parent && i <= parent->key_num; i++)
-   {
-      if (parent->data[i] == node)
-      {
-         return i;
-      }
-   }
-   return 0;
+   // b_tree_node_t *parent = node->parent;
+   // for (int i = 0; parent && i <= parent->key_num; i++)
+   // {
+   //    if (parent->data[i] == node)
+   //    {
+   //       return i;
+   //    }
+   // }
+   printf("child_index:%d\n", node->child_index);
+   return node->child_index;
 }
 
 //index是插入的位置
@@ -219,6 +221,7 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
             clear_node_key(cur_node->key[i]);
          }
          new->data[m] = cur_node->data[i];
+         set_node_child_index(new->data[m], m);
          if (new->data[m] != NULL) //todo check the node is leaf node
          {
             set_node_parent(new->data[m], new);
@@ -231,16 +234,20 @@ int b_tree_add_node_int(b_tree_t *btree, int key)
          parent = create_b_tree_node(btree);
          btree->root = parent;
       }
-      set_node_parent(new, parent);
-      set_node_parent(cur_node, parent);
 
       insert_key_to_tree_node(btree, parent, (void *)middle_key, child_index);
       for (int i = parent->key_num; i > child_index + 1; i--)
       {
          parent->data[i] = parent->data[i - 1];
+         set_node_child_index(parent->data[i], i);
       }
       parent->data[child_index] = cur_node;
       parent->data[child_index + 1] = new;
+      set_node_parent(new, parent);
+      set_node_parent(cur_node, parent);
+      set_node_child_index(cur_node, child_index);
+      set_node_child_index(new, child_index + 1);
+
       cur_node = parent;
    }
    return 0;
@@ -272,6 +279,7 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
       if (merge_node->data[i] != NULL)
       {
          set_node_parent(merge_node->data[i], merge_node);
+         set_node_child_index(merge_node->data[i], i);
       }
    }
    memcpy(merge_node->key + merge_node->key_num, merged_node->key, sizeof(*(merged_node->key)) * merged_node->key_num); //合并关键字
@@ -280,6 +288,7 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
    for (int i = merge_child_index + 1; i < parent->key_num; i++) //删除父结点一个孩子结点
    {
       parent->data[i] = parent->data[i + 1];
+      set_node_child_index(parent->data[i], i);
    }
    parent->data[parent->key_num] = NULL;
    del_key_from_tree_node(btree, parent, merge_child_index);
@@ -322,11 +331,13 @@ int b_tree_del_node_int(b_tree_t *btree, int key)
             for (int i = cur_node->key_num + 1; i > 0; i--) //先借孩子结点
             {
                cur_node->data[i] = cur_node->data[i - 1];
+               set_node_child_index(cur_node->data[i], i);
             }
             cur_node->data[0] = l_sibling->data[l_sibling->key_num];
             if (cur_node->data[0] != NULL)
             {
                set_node_parent(cur_node->data[0], cur_node);
+               set_node_child_index(cur_node->data[0], 0);
             }
             insert_key_to_tree_node(btree, cur_node, (void *)cur_node->parent->key[child_index - 1], 0);
             del_key_from_tree_node(btree, cur_node->parent, child_index - 1); //删除父结点的关键字
@@ -343,11 +354,13 @@ int b_tree_del_node_int(b_tree_t *btree, int key)
             if (cur_node->data[cur_node->key_num] != NULL)
             {
                set_node_parent(cur_node->data[cur_node->key_num], cur_node);
+               set_node_child_index(cur_node->data[cur_node->key_num], cur_node->key_num);
             }
 
             for (int i = 0; i < r_sibling->key_num; i++)
             {
                r_sibling->data[i] = r_sibling->data[i + 1];
+               set_node_child_index(r_sibling->data[i], i);
             }
             r_sibling->data[r_sibling->key_num] = NULL;
 

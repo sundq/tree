@@ -31,6 +31,16 @@ extern "C" {
         macro_p->leaf = 0;                                 \
     } while (0)
 
+#define set_node_child_index(node, i)                          \
+    do                                                         \
+    {                                                          \
+        if (node != NULL)                                      \
+        {                                                      \
+            b_tree_node_t *child_node = (b_tree_node_t *)node; \
+            child_node->child_index = i;                       \
+        }                                                      \
+    } while (0)
+
 #define assign_node_key(dst, src) memcpy(dst, src, key_size)
 #define clear_node_key(buff) memset(buff, 0, key_size)
 
