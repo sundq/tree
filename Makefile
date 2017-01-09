@@ -3,7 +3,7 @@ INCLUDES = -I/usr/include
 LIBS = -L/usr/lib
 
 CCFLAGS = -g
-OBJS = obj/b_tree.o obj/rb_tree.o obj/binary_tree.o obj/avl_tree.o obj/queue.o obj/memory_pool.o obj/print_binary_tree_ascii.o
+OBJS = obj/b_tree.o obj/b_plus_tree.o obj/rb_tree.o obj/binary_tree.o obj/avl_tree.o obj/queue.o obj/memory_pool.o obj/print_binary_tree_ascii.o
 
 all: obj bin bin/tree
 
@@ -18,6 +18,8 @@ obj/main.o: main.c
 	${CC} -c main.c $(CCFLAGS) -o $@ $(INCLUDES)
 obj/b_tree.o: b_tree.c
 	${CC} -c b_tree.c $(CCFLAGS) -o $@ $(INCLUDES)
+obj/b_plus_tree.o: b_plus_tree.c
+	${CC} -c b_plus_tree.c $(CCFLAGS) -o $@ $(INCLUDES)	
 obj/avl_tree.o: avl_tree.c
 	${CC} -c avl_tree.c $(CCFLAGS) -o $@ $(INCLUDES)	
 obj/rb_tree.o: rb_tree.c
