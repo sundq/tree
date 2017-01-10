@@ -25,6 +25,23 @@ static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
    return node;
 }
 
+static inline b_tree_node_t *create_b_tree_root(b_tree_t *btree, void *key, b_tree_node_t *child1, b_tree_node_t *child2)
+{
+   b_tree_node_t *parent = create_b_tree_node(btree);
+   parent->leaf = 0;
+   btree->root = parent;
+   parent->data[0] = child1;
+   parent->data[1] = child2;
+   set_node_parent(child1, parent);
+   set_node_parent(child2, parent);
+   set_node_child_index(child1, 0);
+   set_node_child_index(child2, 1);
+   assign_node_key(parent->key[0], key);
+   parent->key_num++;
+
+   return parent;
+}
+
 static inline b_tree_node_t *release_b_tree_node(b_tree_node_t *node)
 {
    free(node->data);
@@ -170,31 +187,19 @@ int b_plus_tree_add_node_int(b_tree_t *btree, int key, void *data)
       {
          for (int i = 0; i <= new->key_num; i++)
          {
-            {
-               set_node_parent(new->data[i], new);
-               set_node_child_index(new->data[i], i);
-            }
+            set_node_parent(new->data[i], new);
+            set_node_child_index(new->data[i], i);
          }
       }
       else
-      {
+      {//set the next node pointer
          new->data[btree->order] = next_node;
          cur_node->data[btree->order] = new;
       }
 
       if (parent == NULL)
-      {
-         parent = create_b_tree_node(btree);
-         parent->leaf = 0;
-         btree->root = parent;
-         parent->data[child_index] = cur_node;
-         parent->data[child_index + 1] = new;
-         set_node_parent(new, parent);
-         set_node_parent(cur_node, parent);
-         set_node_child_index(cur_node, child_index);
-         set_node_child_index(new, child_index + 1);
-         assign_node_key(parent->key[0], (void *)middle_key);
-         parent->key_num++;
+      {//root node is full, create new root node, the height of the tree +1
+         parent = create_b_tree_root(btree, (void *)middle_key, cur_node, new);
       }
       else
       {

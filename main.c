@@ -92,7 +92,7 @@ void rb_tree_test()
    printf("delete a red-black tree ok.\n");
    printf("\n");
 }
-#define size_buff 20 //1024 * 1024
+#define size_buff 2000 //1024 * 1024
 
 void b_tree_test()
 {
