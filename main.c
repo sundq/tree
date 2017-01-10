@@ -92,7 +92,7 @@ void rb_tree_test()
    printf("delete a red-black tree ok.\n");
    printf("\n");
 }
-#define size_buff 2000 //1024 * 1024
+#define size_buff 200 //1024 * 1024
 
 void b_tree_test()
 {
@@ -169,7 +169,7 @@ void b_plus_tree_test()
       int tmp = rand() % (num * 20);
       printf("add %d\n", tmp);
       cache[i] = tmp;
-      b_plus_tree_add_node_int(t, tmp, NULL);
+      b_plus_tree_add_key_int(t, tmp, NULL);
       printf("\n*****************************1\n");
       b_tree_bfs_traversal_subtree(t->root, traverse);
       printf("*****************************2\n\n\n");

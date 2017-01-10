@@ -62,10 +62,10 @@ void *b_tree_find(b_tree_t *btree, void *key);
 void *b_tree_find_int(b_tree_t *btree, int key);
 int b_tree_add_node(b_tree_t *btree, void *key);
 int b_tree_add_node_int(b_tree_t *btree, int key);
-int b_plus_tree_add_node_int(b_tree_t *btree, int key, void *data);
 int b_tree_del_node(b_tree_t *btree, void *key);
 int b_tree_del_node_int(b_tree_t *btree, int key);
-int b_plus_tree_del_node_int(b_tree_t *btree, int key);
+int b_plus_tree_add_key_int(b_tree_t *btree, int key, void *data);
+int b_plus_tree_del_key_int(b_tree_t *btree, int key);
 int b_tree_bfs_traversal_subtree(b_tree_node_t *subtree, traversal_callback cb);
 
 #ifdef __cplusplus
