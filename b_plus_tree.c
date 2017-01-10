@@ -106,11 +106,15 @@ static inline int insert_key_to_tree_node(b_tree_node_t *node, void *key, void *
    assign_node_key(node->key[index], key);
    node->key_num++;
 
-   node->data[index + 1] = data; //set child or data
-   if (!is_leaf_node(node))      //非叶子结点
+   if (!is_leaf_node(node)) //非叶子结点
    {
+      node->data[index + 1] = data; //set child
       set_node_parent(data, node);
       set_node_child_index(data, index + 1);
+   }
+   else
+   {
+      node->data[index] = data; //set data
    }
    return index;
 }
@@ -142,6 +146,8 @@ int b_plus_tree_add_node_int(b_tree_t *btree, int key, void *data)
    b_tree_node_t *insert_node = NULL;
    int found_key_index = 0;
    int iret = find_key(btree, (void *)&key, &insert_node, &found_key_index, compare_int);
+   b_tree_node_t *next_node = insert_node->data[btree->order];
+
    if (iret != 0) //not found
    {
       insert_key_to_tree_node(insert_node, (void *)&key, data, found_key_index);
@@ -172,7 +178,7 @@ int b_plus_tree_add_node_int(b_tree_t *btree, int key, void *data)
       }
       else
       {
-         new->data[btree->order] = cur_node->data[btree->order];
+         new->data[btree->order] = next_node;
          cur_node->data[btree->order] = new;
       }
 
