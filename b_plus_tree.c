@@ -69,11 +69,11 @@ static inline int binary_search(key_t array, int len, void *key, int *index, com
          high = mid - 1;
       }
    }
-   *index = iret < 0 ? mid : mid + 1;
+   *index = iret <= 0 ? mid : mid + 1;
    return iret;
 }
 
-static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_node, int *key_index, b_tree_node_t **router_node, int *router_index, compare_func_t compare)
+static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_node, int *key_index, compare_func_t compare)
 {
    b_tree_node_t *node = btree->root;
    int index = 0;
@@ -85,16 +85,17 @@ static inline int find_key(b_tree_t *btree, void *key, b_tree_node_t **found_nod
    {
       index = 0;
       iret = binary_search(node->key, node->key_num, key, key_index, compare);
-      if (iret == 0 && router_node != NULL)
-      {
-         *router_node = node;
-         *router_index = *key_index;
-      }
-
       *found_node = node;
       if (!is_leaf_node(node))
       {
-         node = node->data[*key_index];
+         if (iret != 0)
+         {
+            node = node->data[*key_index];
+         }
+         else
+         {
+            node = node->data[*key_index + 1];
+         }
       }
       else
       {
@@ -133,7 +134,6 @@ static inline int insert_key_to_tree_node(b_tree_node_t *node, void *key, void *
       assign_node_key(node->key[m], node->key[m - 1]);
       node->data[m + 1] = node->data[m];
       set_node_child_index(node->data[m + 1], m + 1);
-
    }
    node->data[index + 1] = node->data[index];
    set_node_child_index(node->data[index + 1], index + 1);
@@ -146,14 +146,18 @@ static inline int insert_key_to_tree_node(b_tree_node_t *node, void *key, void *
    return index;
 }
 
-static inline int del_key_from_tree_node(b_tree_t *btree, b_tree_node_t *node, int key_index)
+static inline int del_key_from_tree_node(b_tree_node_t *node, int key_index)
 {
    for (int i = key_index; i < node->key_num; i++)
    {
       assign_node_key(node->key[i], node->key[i + 1]);
+      node->data[i] = node->data[i + 1];
+      if (!is_leaf_node(node))
+      {
+         set_node_child_index(node->data[i], i);
+      }
    }
-   clear_node_key(node->key[node->key_num]);
-
+   node->data[node->key_num] = NULL;
    node->key_num--;
    return 0;
 }
@@ -196,7 +200,7 @@ void *b_plus_tree_find_int(b_tree_t *btree, int key)
    void *found_key = NULL;
    b_tree_node_t *found_node = NULL;
    int found_key_index = 0;
-   int iret = find_key(btree, (void *)&key, &found_node, &found_key_index, NULL, NULL, compare_int);
+   int iret = find_key(btree, (void *)&key, &found_node, &found_key_index, compare_int);
    found_key = iret == 0 ? (void *)found_node->key[found_key_index] : NULL;
    return found_key;
 }
@@ -205,7 +209,7 @@ int b_plus_tree_add_key_int(b_tree_t *btree, int key, void *data)
 {
    b_tree_node_t *insert_node = NULL;
    int found_key_index = 0;
-   int iret = find_key(btree, (void *)&key, &insert_node, &found_key_index, NULL, NULL, compare_int);
+   int iret = find_key(btree, (void *)&key, &insert_node, &found_key_index, compare_int);
    b_tree_node_t *next_node = insert_node->data[btree->order];
 
    if (iret != 0) //not found
@@ -247,45 +251,58 @@ int b_plus_tree_add_key_int(b_tree_t *btree, int key, void *data)
    return 0;
 }
 
+static inline b_tree_node_t *delete_key_from_tree(b_tree_t *btree, void *key, compare_func_t compare)
+{
+   int key_index = 0;
+   b_tree_node_t *node = NULL;
+   int found_key_index = 0;
+   int iret = find_key(btree, key, &node, &key_index, compare);
+   if (iret == 0)
+   {
+      del_key_from_tree_node(node, key_index);
+   }
+
+   return node;
+}
+
 static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node, int child_index, b_tree_node_t *l_sibling, b_tree_node_t *r_sibling)
 {
    b_tree_node_t *parent = cur_node->parent;
    b_tree_node_t *merge_node = NULL;
-   b_tree_node_t *merged_node = NULL; //被合并的结点
-   int merge_child_index = child_index;
-   if (l_sibling != NULL) //左兄弟存在
+   b_tree_node_t *merged_node = NULL;
+   if (l_sibling != NULL)
    {
       merge_node = l_sibling;
       merged_node = cur_node;
-      merge_child_index -= 1;
    }
    else
    {
       merge_node = cur_node;
       merged_node = r_sibling;
-      merge_child_index = child_index;
    }
+   int merge_child_index = merged_node->child_index - 1;
 
-   assign_node_key(merge_node->key[merge_node->key_num++], parent->key[merge_child_index]); //移动父结点的关键字
-   for (int i = merge_node->key_num, m = 0; m <= merged_node->key_num; i++, m++)            //合并孩子指针
+   if (!is_leaf_node(merged_node))
    {
-      merge_node->data[i] = merged_node->data[m];
-      if (merge_node->data[i] != NULL)
+      assign_node_key(merge_node->key[merge_node->key_num++], parent->key[merge_child_index]);
+      memcpy(merge_node->key + merge_node->key_num, merged_node->key, key_size * merged_node->key_num);
+      memcpy(merge_node->data + merge_node->key_num, merged_node->data, sizeof(void *) * (merged_node->key_num + 1));
+      for (int i = 0; i <= merged_node->key_num; i++)
       {
-         set_node_parent(merge_node->data[i], merge_node);
-         set_node_child_index(merge_node->data[i], i);
+         set_node_parent(merged_node->data[i], merge_node);
+         set_node_child_index(merged_node->data[i], i + merge_node->key_num + 1);
       }
    }
-   memcpy(merge_node->key + merge_node->key_num, merged_node->key, sizeof(*(merged_node->key)) * merged_node->key_num); //合并关键字
-   merge_node->key_num += merged_node->key_num;
-
-   for (int i = merge_child_index + 1; i < parent->key_num; i++) //删除父结点一个孩子结点
+   else
    {
-      parent->data[i] = parent->data[i + 1];
-      set_node_child_index(parent->data[i], i);
+      memcpy(merge_node->key + merge_node->key_num, merged_node->key, key_size * merged_node->key_num);
+      memcpy(merge_node->data + merge_node->key_num, merged_node->data, sizeof(void *) * merged_node->key_num);
+      merge_node->data[btree->order] = merged_node->data[btree->order];
    }
-   parent->data[parent->key_num] = NULL;
-   del_key_from_tree_node(btree, parent, merge_child_index);
+
+   merge_node->key_num += merged_node->key_num;
+   merge_node->parent->data[merge_child_index + 1] = merge_node;
+   del_key_from_tree_node(merge_node->parent, merge_child_index);
    release_b_tree_node(merged_node);
    return merge_node;
 }
@@ -297,78 +314,62 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
    b_tree_node_t *router_node = NULL;
    int router_index = 0;
    int found_key_index = 0;
-   int iret = find_key(btree, (void *)&key, &cur_node, &key_index, &router_node, &router_index, compare_int);
-   if (iret == 0)
+   cur_node = delete_key_from_tree(btree, &key, compare_int);
+   while ((cur_node != NULL &&
+           cur_node->key_num < (ceil(btree->order, 2) - 1) &&
+           cur_node->parent != NULL))
    {
-      del_key_from_tree_node(btree, cur_node, key_index);
-      while ((cur_node != NULL &&
-              cur_node->key_num < (ceil(btree->order, 2) - 1) &&
-              cur_node->parent != NULL))
-      {
-         int child_index = find_child_index(cur_node);
-         b_tree_node_t *l_sibling = child_index > 0 ? cur_node->parent->data[child_index - 1] : NULL;
-         b_tree_node_t *r_sibling = child_index < cur_node->parent->key_num ? cur_node->parent->data[child_index + 1] : NULL;
+      int child_index = find_child_index(cur_node);
+      b_tree_node_t *l_sibling = child_index > 0 ? cur_node->parent->data[child_index - 1] : NULL;
+      b_tree_node_t *r_sibling = child_index < cur_node->parent->key_num ? cur_node->parent->data[child_index + 1] : NULL;
 
-         //借结点需要关键字和孩子结点一起借!!!
-         if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2)) //左兄弟丰满
+      if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2)) //borrow key from left sibling
+      {
+         if (!is_leaf_node(cur_node))
          {
-            for (int i = cur_node->key_num + 1; i > 0; i--) //先借孩子结点
-            {
-               cur_node->data[i] = cur_node->data[i - 1];
-               set_node_child_index(cur_node->data[i], i);
-            }
-            cur_node->data[0] = l_sibling->data[l_sibling->key_num];
-            if (cur_node->data[0] != NULL)
-            {
-               set_node_parent(cur_node->data[0], cur_node);
-               set_node_child_index(cur_node->data[0], 0);
-            }
             insert_key_to_tree_node(cur_node, (void *)cur_node->parent->key[child_index - 1], l_sibling->data[l_sibling->key_num], 0);
-            del_key_from_tree_node(btree, cur_node->parent, child_index - 1); //删除父结点的关键字
-            insert_key_to_tree_node(btree, cur_node->parent, (void *)l_sibling->key[l_sibling->key_num - 1], child_index - 1);
-            clear_node_key(l_sibling->key[l_sibling->key_num - 1]);
-            l_sibling->key_num--;
          }
-         else if (r_sibling != NULL && r_sibling->key_num >= ceil(btree->order, 2)) //右兄弟丰满
+         else
+         {
+            insert_key_data_to_leaf_node(cur_node, (void *)cur_node->parent->key[child_index - 1], l_sibling->data[l_sibling->key_num], 0);
+         }
+         assign_node_key(cur_node->parent->key[child_index - 1], (void *)l_sibling->key[l_sibling->key_num - 1]);
+         clear_node_key(l_sibling->key + l_sibling->key_num - 1);
+         l_sibling->data[l_sibling->key_num] = NULL;
+         l_sibling->key_num--;
+      }
+      else if (r_sibling != NULL && r_sibling->key_num >= ceil(btree->order, 2)) //borrow key from right sibling
+      {
+         if (!is_leaf_node(cur_node))
+         {
+            assign_node_key(cur_node->key[cur_node->key_num++], cur_node->parent->key[child_index]);
+            cur_node->data[cur_node->key_num] = r_sibling->data[0];
+            set_node_parent(cur_node->data[cur_node->key_num], cur_node);
+            set_node_child_index(cur_node, cur_node->key_num);
+         }
+         else
          {
             assign_node_key(cur_node->key[cur_node->key_num], cur_node->parent->key[child_index]);
-            cur_node->key_num++;
-
-            cur_node->data[cur_node->key_num] = r_sibling->data[0];
-            if (cur_node->data[cur_node->key_num] != NULL)
-            {
-               set_node_parent(cur_node->data[cur_node->key_num], cur_node);
-               set_node_child_index(cur_node->data[cur_node->key_num], cur_node->key_num);
-            }
-
-            for (int i = 0; i < r_sibling->key_num; i++)
-            {
-               r_sibling->data[i] = r_sibling->data[i + 1];
-               set_node_child_index(r_sibling->data[i], i);
-            }
-            r_sibling->data[r_sibling->key_num] = NULL;
-
-            del_key_from_tree_node(btree, cur_node->parent, child_index); //删除父结点的关键字
-            insert_key_to_tree_node(btree, cur_node->parent, (void *)r_sibling->key[0], child_index);
-            del_key_from_tree_node(btree, r_sibling, 0);
+            cur_node->data[cur_node->key_num++] = r_sibling->data[0];
          }
-         else //合并
+         assign_node_key(cur_node->parent->key[child_index], r_sibling->key[0]);
+         del_key_from_tree_node(r_sibling, 0);
+      }
+      else //合并
+      {
+         b_tree_node_t *merged_node = merge_node(btree, cur_node, child_index, l_sibling, r_sibling);
+         if (merged_node->parent != NULL && merged_node->parent->parent == NULL && merged_node->parent->key_num == 0)
          {
-            b_tree_node_t *merged_node = merge_node(btree, cur_node, child_index, l_sibling, r_sibling);
-            if (merged_node->parent != NULL && merged_node->parent->parent == NULL && merged_node->parent->key_num == 0)
-            {
-               btree->root = merged_node;
-               release_b_tree_node(merged_node->parent); //树的高度降低
-               merged_node->parent = NULL;
-               cur_node = NULL;
-            }
-            else
-            {
-               cur_node = merged_node->parent;
-            }
+            btree->root = merged_node;
+            release_b_tree_node(merged_node->parent); //树的高度降低
+            merged_node->parent = NULL;
+            cur_node = NULL;
+         }
+         else
+         {
+            cur_node = merged_node->parent;
          }
       }
    }
-
    return 0;
 }

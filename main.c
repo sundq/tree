@@ -92,7 +92,7 @@ void rb_tree_test()
    printf("delete a red-black tree ok.\n");
    printf("\n");
 }
-#define size_buff 200 //1024 * 1024
+#define size_buff 20 //1024 * 1024
 
 void b_tree_test()
 {
@@ -175,8 +175,18 @@ void b_plus_tree_test()
       printf("*****************************2\n\n\n");
       print_b_plus_tree(t);
    }
-   // b_tree_bfs_traversal_subtree(t->root, traverse);
-   print_b_plus_tree(t);
+
+   for (int i = 0; i < num; i++)
+   {
+      int tmp = cache[rand() % num];
+      //*tmp = cache[i];
+      printf("DEL %d\n", tmp);
+      b_plus_tree_del_key_int(t, tmp);
+      printf("==============================1\n");
+      b_tree_bfs_traversal_subtree(t->root, traverse);
+      printf("==============================2\n\n\n");
+      print_b_plus_tree(t);
+   }
 }
 
 int main(int argc, char **argv)
