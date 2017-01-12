@@ -290,7 +290,7 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
       for (int i = 0; i <= merged_node->key_num; i++)
       {
          set_node_parent(merged_node->data[i], merge_node);
-         set_node_child_index(merged_node->data[i], i + merge_node->key_num + 1);
+         set_node_child_index(merged_node->data[i], i + merge_node->key_num);
       }
    }
    else
@@ -325,6 +325,7 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
 
       if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2)) //borrow key from left sibling
       {
+         assign_node_key(cur_node->parent->key[child_index - 1], (void *)l_sibling->key[l_sibling->key_num - 1]);
          if (!is_leaf_node(cur_node))
          {
             insert_key_to_tree_node(cur_node, (void *)cur_node->parent->key[child_index - 1], l_sibling->data[l_sibling->key_num], 0);
@@ -333,7 +334,6 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
          {
             insert_key_data_to_leaf_node(cur_node, (void *)cur_node->parent->key[child_index - 1], l_sibling->data[l_sibling->key_num], 0);
          }
-         assign_node_key(cur_node->parent->key[child_index - 1], (void *)l_sibling->key[l_sibling->key_num - 1]);
          clear_node_key(l_sibling->key + l_sibling->key_num - 1);
          l_sibling->data[l_sibling->key_num] = NULL;
          l_sibling->key_num--;
@@ -349,7 +349,9 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
          }
          else
          {
-            assign_node_key(cur_node->key[cur_node->key_num], cur_node->parent->key[child_index]);
+            // assign_node_key(cur_node->key[cur_node->key_num], cur_node->parent->key[child_index]);
+            assign_node_key(cur_node->key[cur_node->key_num], r_sibling->key[0]);
+            assign_node_key(cur_node->parent->key[child_index], r_sibling->key[1]);
             cur_node->data[cur_node->key_num++] = r_sibling->data[0];
          }
          assign_node_key(cur_node->parent->key[child_index], r_sibling->key[0]);

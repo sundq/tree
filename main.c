@@ -159,16 +159,17 @@ void print_b_plus_tree(b_tree_t *btree)
 
 void b_plus_tree_test()
 {
-   int cache[size_buff] = {0};
-   //int test[] = {138, 207, 265, 345};
-   int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
+   //int cache[size_buff] = {0};
+   int test[] = {318, 73, 168, 195, 368, 34, 195, 235, 292, 83, 236, 374, 39, 314, 240, 65, 268, 65, 32, 276};
+   int cache[] = {73,195,374,195,83,374,65,195,368,73,318};
+   int num = sizeof(test) / sizeof(int); //sizeof(test) / sizeof(int);
    srand((unsigned)time(NULL));
    b_tree_t *t = b_tree_init(3, compare);
    for (int i = 0; i < num; i++)
    {
-      int tmp = rand() % (num * 20);
+      int tmp = test[i];//rand() % (num * 20);
       printf("add %d\n", tmp);
-      cache[i] = tmp;
+      //cache[i] = tmp;
       b_plus_tree_add_key_int(t, tmp, NULL);
       printf("\n*****************************1\n");
       b_tree_bfs_traversal_subtree(t->root, traverse);
@@ -178,8 +179,7 @@ void b_plus_tree_test()
 
    for (int i = 0; i < num; i++)
    {
-      int tmp = cache[rand() % num];
-      //*tmp = cache[i];
+      int tmp = cache[i]; //cache[rand() % num];
       printf("DEL %d\n", tmp);
       b_plus_tree_del_key_int(t, tmp);
       printf("==============================1\n");
