@@ -2,7 +2,7 @@ CC=gcc
 INCLUDES = -I/usr/include
 LIBS = -L/usr/lib
 
-CCFLAGS = -g
+CCFLAGS = -g -DDEBUG
 OBJS = obj/b_tree.o obj/b_plus_tree.o obj/rb_tree.o obj/binary_tree.o obj/avl_tree.o obj/queue.o obj/memory_pool.o obj/print_binary_tree_ascii.o
 
 all: obj bin bin/tree

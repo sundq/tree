@@ -13,6 +13,59 @@ static int compare_str(void *a, void *b)
    return strcmp((char *)a, (char *)b);
 }
 
+static int printf_node_info(b_tree_node_t *node)
+{
+   if (node != NULL)
+   {
+      printf("address %x ", (int)node);
+      printf("key_num:%lu, child_index:%d, leaf:%d ", node->key_num, node->child_index, node->leaf);
+      printf("key:");
+      for (int i = 0; i < node->key_num; i++)
+      {
+         printf("%d ", *(int *)node->key[i]);
+      }
+   }
+   else
+   {
+      printf("node NULL\n");
+   }
+
+   return 0;
+}
+
+static int traverse(void *a)
+{
+   if (a == NULL)
+   {
+      printf("NULL ");
+      return 0;
+   }
+   printf("%d ", *(int *)a);
+   return 0;
+}
+
+static int check_child_index(b_tree_t *btree, b_tree_node_t *node)
+{
+   if (node != NULL && !is_leaf_node(node))
+   {
+      for (int i = 0; i <= node->key_num; i++)
+      {
+         b_tree_node_t *child_node = (b_tree_node_t *)node->data[i];
+         if (child_node->child_index != i)
+         {
+            printf("hahahah...\n");
+            printf_node_info(node);
+            printf("\n");
+            printf_node_info(child_node);
+            printf("\n");
+            b_tree_bfs_traversal_subtree(btree->root, traverse);
+         }
+         assert(child_node->child_index == i);
+      }
+   }
+   return 0;
+}
+
 static inline b_tree_node_t *create_b_tree_node(b_tree_t *root)
 {
    b_tree_node_t *node = (b_tree_node_t *)allocate_memory(sizeof(b_tree_node_t));
@@ -246,6 +299,15 @@ int b_plus_tree_add_key_int(b_tree_t *btree, int key, void *data)
          set_node_parent(new, parent);
          insert_key_to_tree_node(parent, (void *)middle_key, cur_node, child_index);
       }
+#if DEBUG
+      printf("\nnew info:");
+      printf_node_info(new);
+      printf("\nur_node info:");
+      printf_node_info(cur_node);
+      printf("\nparent info:");
+      printf_node_info(cur_node->parent);
+      printf("\n");
+#endif
       cur_node = parent;
    }
    return 0;
@@ -280,6 +342,17 @@ static inline b_tree_node_t *merge_node(b_tree_t *btree, b_tree_node_t *cur_node
       merge_node = cur_node;
       merged_node = r_sibling;
    }
+
+#if DEBUG
+   printf("\nmerge_node info:");
+   printf_node_info(merge_node);
+   printf("\nmerged_node info:");
+   printf_node_info(merged_node);
+   printf("\nparent info:");
+   printf_node_info(merged_node->parent);
+   printf("\n");
+#endif
+
    int merge_child_index = merged_node->child_index - 1;
 
    if (!is_leaf_node(merged_node))
@@ -311,8 +384,6 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
 {
    int key_index = 0;
    b_tree_node_t *cur_node = NULL;
-   b_tree_node_t *router_node = NULL;
-   int router_index = 0;
    int found_key_index = 0;
    cur_node = delete_key_from_tree(btree, &key, compare_int);
    while ((cur_node != NULL &&
@@ -322,30 +393,48 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
       int child_index = find_child_index(cur_node);
       b_tree_node_t *l_sibling = child_index > 0 ? cur_node->parent->data[child_index - 1] : NULL;
       b_tree_node_t *r_sibling = child_index < cur_node->parent->key_num ? cur_node->parent->data[child_index + 1] : NULL;
-
+#if DEBUG
+      printf("\nbefore...");
+      printf("\ncur_node info:");
+      printf_node_info(cur_node);
+      printf("\nl_sibling info:");
+      printf_node_info(l_sibling);
+      printf("\nr_sibling info:");
+      printf_node_info(r_sibling);
+      printf("\nparent info:");
+      printf_node_info(cur_node->parent);
+      printf("\n");
+#endif
       if (l_sibling != NULL && l_sibling->key_num >= ceil(btree->order, 2)) //borrow key from left sibling
       {
-         assign_node_key(cur_node->parent->key[child_index - 1], (void *)l_sibling->key[l_sibling->key_num - 1]);
          if (!is_leaf_node(cur_node))
          {
             insert_key_to_tree_node(cur_node, (void *)cur_node->parent->key[child_index - 1], l_sibling->data[l_sibling->key_num], 0);
+            assign_node_key(cur_node->parent->key[child_index - 1], (void *)l_sibling->key[l_sibling->key_num - 1]);
          }
          else
          {
+            assign_node_key(cur_node->parent->key[child_index - 1], (void *)l_sibling->key[l_sibling->key_num - 1]);
             insert_key_data_to_leaf_node(cur_node, (void *)cur_node->parent->key[child_index - 1], l_sibling->data[l_sibling->key_num], 0);
          }
          clear_node_key(l_sibling->key + l_sibling->key_num - 1);
          l_sibling->data[l_sibling->key_num] = NULL;
          l_sibling->key_num--;
+
+#if DEBUG
+         check_child_index(btree, cur_node);
+         check_child_index(btree, cur_node->parent);
+#endif
       }
       else if (r_sibling != NULL && r_sibling->key_num >= ceil(btree->order, 2)) //borrow key from right sibling
       {
          if (!is_leaf_node(cur_node))
          {
             assign_node_key(cur_node->key[cur_node->key_num++], cur_node->parent->key[child_index]);
+            assign_node_key(cur_node->parent->key[child_index], r_sibling->key[0]);
             cur_node->data[cur_node->key_num] = r_sibling->data[0];
             set_node_parent(cur_node->data[cur_node->key_num], cur_node);
-            set_node_child_index(cur_node, cur_node->key_num);
+            set_node_child_index(cur_node->data[cur_node->key_num], cur_node->key_num);
          }
          else
          {
@@ -354,12 +443,23 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
             assign_node_key(cur_node->parent->key[child_index], r_sibling->key[1]);
             cur_node->data[cur_node->key_num++] = r_sibling->data[0];
          }
-         assign_node_key(cur_node->parent->key[child_index], r_sibling->key[0]);
          del_key_from_tree_node(r_sibling, 0);
+#if DEBUG
+         check_child_index(btree, cur_node);
+         check_child_index(btree, cur_node->parent);
+#endif
       }
       else //合并
       {
+         printf("merge..\n");
          b_tree_node_t *merged_node = merge_node(btree, cur_node, child_index, l_sibling, r_sibling);
+#if DEBUG
+         printf("merge step..\n");
+         b_tree_bfs_traversal_subtree(btree->root, traverse);
+         printf("\n");
+         check_child_index(btree, merged_node);
+         check_child_index(btree, merged_node->parent);
+#endif
          if (merged_node->parent != NULL && merged_node->parent->parent == NULL && merged_node->parent->key_num == 0)
          {
             btree->root = merged_node;
@@ -372,6 +472,18 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
             cur_node = merged_node->parent;
          }
       }
+#if 0//DEBUG
+      printf("\nafter...");
+      printf("\ncur_node info:");
+      printf_node_info(cur_node);
+      printf("\nl_sibling info:");
+      printf_node_info(l_sibling);
+      printf("\nr_sibling info:");
+      printf_node_info(r_sibling);
+      printf("\nparent info:");
+      printf_node_info(cur_node->parent);
+      printf("\n");
+#endif
    }
    return 0;
 }

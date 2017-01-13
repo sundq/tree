@@ -16,6 +16,7 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
+#include <assert.h>
 #include "./binary_tree.h"
 #include "./util/queue.h"
 

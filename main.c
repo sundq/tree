@@ -92,7 +92,7 @@ void rb_tree_test()
    printf("delete a red-black tree ok.\n");
    printf("\n");
 }
-#define size_buff 20 //1024 * 1024
+#define size_buff 40 //1024 * 1024
 
 void b_tree_test()
 {
@@ -159,9 +159,10 @@ void print_b_plus_tree(b_tree_t *btree)
 
 void b_plus_tree_test()
 {
+#if 0
    //int cache[size_buff] = {0};
-   int test[] = {318, 73, 168, 195, 368, 34, 195, 235, 292, 83, 236, 374, 39, 314, 240, 65, 268, 65, 32, 276};
-   int cache[] = {73,195,374,195,83,374,65,195,368,73,318};
+   int test[] = {779,172,52,515,485,52,254,41,23,169,385,388,665,152,438,566,528,152,110,463,505,337,771,759,197,400,31,479,388,603,126,425,298,519,135,131,290,342,176,229};
+   int cache[] = {388,342,110,31,126,337,385,131,505,23,131,400,388,110,290,152,110,342,41};
    int num = sizeof(test) / sizeof(int); //sizeof(test) / sizeof(int);
    srand((unsigned)time(NULL));
    b_tree_t *t = b_tree_init(3, compare);
@@ -177,7 +178,7 @@ void b_plus_tree_test()
       print_b_plus_tree(t);
    }
 
-   for (int i = 0; i < num; i++)
+   for (int i = 0; i < sizeof(cache) / sizeof(int); i++)
    {
       int tmp = cache[i]; //cache[rand() % num];
       printf("DEL %d\n", tmp);
@@ -187,6 +188,44 @@ void b_plus_tree_test()
       printf("==============================2\n\n\n");
       print_b_plus_tree(t);
    }
+#else
+   int cache[size_buff] = {0};
+   int delcache[size_buff] = {0};
+   FILE *fpadd = fopen("add", "w");
+   FILE *fpdel = fopen("del", "w");
+   int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
+   srand((unsigned)time(NULL));
+   b_tree_t *t = b_tree_init(3, compare);
+   for (int i = 0; i < num; i++)
+   {
+      int tmp = rand() % (num * 20);
+      printf("add %d\n", tmp);
+      cache[i] = tmp;
+      fprintf(fpadd, "%d,", tmp);
+      fflush(fpadd);
+      b_plus_tree_add_key_int(t, tmp, NULL);
+      printf("\n*****************************1\n");
+      b_tree_bfs_traversal_subtree(t->root, traverse);
+      printf("*****************************2\n\n\n");
+      print_b_plus_tree(t);
+   }
+
+   for (int i = 0; i < num; i++)
+   {
+      int tmp = cache[rand() % num];
+      printf("DEL %d\n", tmp);
+      fprintf(fpdel, "%d,", tmp);
+      fflush(fpdel);
+      b_plus_tree_del_key_int(t, tmp);
+      printf("==============================1\n");
+      b_tree_bfs_traversal_subtree(t->root, traverse);
+      printf("==============================2\n\n\n");
+      print_b_plus_tree(t);
+   }
+
+   fclose(fpadd);
+   fclose(fpdel);
+#endif
 }
 
 int main(int argc, char **argv)
