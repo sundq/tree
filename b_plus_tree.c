@@ -472,18 +472,6 @@ int b_plus_tree_del_key_int(b_tree_t *btree, int key)
             cur_node = merged_node->parent;
          }
       }
-#if 0//DEBUG
-      printf("\nafter...");
-      printf("\ncur_node info:");
-      printf_node_info(cur_node);
-      printf("\nl_sibling info:");
-      printf_node_info(l_sibling);
-      printf("\nr_sibling info:");
-      printf_node_info(r_sibling);
-      printf("\nparent info:");
-      printf_node_info(cur_node->parent);
-      printf("\n");
-#endif
    }
    return 0;
 }

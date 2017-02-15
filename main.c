@@ -92,7 +92,7 @@ void rb_tree_test()
    printf("delete a red-black tree ok.\n");
    printf("\n");
 }
-#define size_buff 40 //1024 * 1024
+#define size_buff 2000 //1024 * 1024
 
 void b_tree_test()
 {
@@ -190,12 +190,11 @@ void b_plus_tree_test()
    }
 #else
    int cache[size_buff] = {0};
-   int delcache[size_buff] = {0};
    FILE *fpadd = fopen("add", "w");
    FILE *fpdel = fopen("del", "w");
    int num = sizeof(cache) / sizeof(int); //sizeof(test) / sizeof(int);
    srand((unsigned)time(NULL));
-   b_tree_t *t = b_tree_init(3, compare);
+   b_tree_t *t = b_tree_init(10, compare);
    for (int i = 0; i < num; i++)
    {
       int tmp = rand() % (num * 20);
@@ -210,7 +209,7 @@ void b_plus_tree_test()
       print_b_plus_tree(t);
    }
 
-   for (int i = 0; i < num; i++)
+   for (int i = 0; i < num * 8; i++)
    {
       int tmp = cache[rand() % num];
       printf("DEL %d\n", tmp);
